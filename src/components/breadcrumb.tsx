@@ -1,28 +1,39 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { BentoItem } from "./grid/recursive-grid";
+import { TesseractCellData } from "@/types"; // Importing from your new types file
 
 interface BreadcrumbProps {
   path: string[];
-  rootItems: BentoItem[];
+  rootItems: TesseractCellData[];
   onNavigate: (path: string[]) => void;
   className?: string;
 }
 
-export const Breadcrumb = ({ path, rootItems, onNavigate, className }: BreadcrumbProps) => {
-  // Helper to find item title by ID
-  const findItem = (items: BentoItem[], id: string): BentoItem | undefined => {
-    for (const item of items) {
-      if (item.id === id) return item;
-      if (item.children) {
-        const found = findItem(item.children, id);
-        if (found) return found;
+export const Breadcrumb = ({ 
+  path, 
+  rootItems, 
+  onNavigate, 
+  className 
+}: BreadcrumbProps) => {
+  
+  // Optimized: Resolve the full object chain based on the path
+  // This is much faster than searching the whole tree for every segment
+  const breadcrumbItems = useMemo(() => {
+    let currentLevel = rootItems;
+    
+    return path.map((id) => {
+      const item = currentLevel.find((n) => n.id === id);
+      
+      // If we found the item, update the scope to search its children next
+      if (item?.children) {
+        currentLevel = item.children;
       }
-    }
-    return undefined;
-  };
+      
+      return { id, title: item?.title || id, original: item };
+    });
+  }, [path, rootItems]);
 
   return (
     <div className={cn("flex items-center gap-2 text-sm font-mono uppercase", className)}>
@@ -38,37 +49,38 @@ export const Breadcrumb = ({ path, rootItems, onNavigate, className }: Breadcrum
       </button>
 
       {/* Path Segments */}
-      {path.map((id, index) => {
-        const item = findItem(rootItems, id);
+      {breadcrumbItems.map((crumb, index) => {
         const isLast = index === path.length - 1;
         // The path to this segment is the slice up to this index + 1
         const segmentPath = path.slice(0, index + 1);
 
         return (
-          <React.Fragment key={id}>
-            <span className="text-zinc-700">/</span>
+          <React.Fragment key={crumb.id}>
+            <span className="text-zinc-700 select-none">/</span>
             <button
               onClick={() => onNavigate(segmentPath)}
               className={cn(
-                "hover:text-white transition-colors",
-                isLast ? "text-white font-bold" : "text-zinc-500"
+                "hover:text-white transition-colors truncate max-w-[150px]",
+                isLast ? "text-white font-bold cursor-default" : "text-zinc-500"
               )}
+              disabled={isLast} // Disable clicking the active item
             >
-              {item?.title || id}
+              {crumb.title}
             </button>
           </React.Fragment>
         );
       })}
 
-      {/* Back Button (only if deep) */}
+      {/* Back Button (Visual Helper) */}
       {path.length > 0 && (
         <>
-          <span className="text-zinc-700 mx-2">|</span>
+          <span className="text-zinc-700 mx-2 select-none">|</span>
           <button
             onClick={() => onNavigate(path.slice(0, -1))}
-            className="text-zinc-500 hover:text-red-400 transition-colors"
+            className="text-xs text-zinc-600 hover:text-red-400 transition-colors flex items-center gap-1"
+            aria-label="Go back"
           >
-            [BACK]
+            <span>[BACK]</span>
           </button>
         </>
       )}

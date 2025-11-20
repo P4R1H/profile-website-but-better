@@ -1,12 +1,13 @@
 "use client";
 
-import { RecursiveGrid, BentoItem } from "../components/grid/recursive-grid";
-import { Breadcrumb } from "@/components/breadcrumb";
-import { useState } from "react";
+import React, { useState } from "react";
+import { Tesseract } from "../components/tesseract/Tesseract"; 
+import { TesseractCellData } from '@/types';
+import { Breadcrumb } from "@/components/breadcrumb"; 
 
 // --- Example Special Card Components ---
 
-const TerminalUI = ({ onClose, item }: { onClose: () => void; item: BentoItem }) => {
+const TerminalUI = ({ onClose, cell }: { onClose: () => void; cell: TesseractCellData }) => {
   const [input, setInput] = useState("");
   const [history, setHistory] = useState<string[]>([
     "Welcome to the Terminal Interface",
@@ -23,7 +24,7 @@ const TerminalUI = ({ onClose, item }: { onClose: () => void; item: BentoItem })
       setInput("");
       return;
     } else if (cmd === "about") {
-      newHistory.push(`This is ${item.title} - ${item.subtitle}`);
+      newHistory.push(`This is ${cell.title} - ${cell.subtitle}`);
     } else if (cmd === "exit") {
       onClose();
       return;
@@ -39,7 +40,7 @@ const TerminalUI = ({ onClose, item }: { onClose: () => void; item: BentoItem })
     <div className="w-full h-full bg-black border border-emerald-500/30 flex flex-col font-mono text-sm">
       {/* Terminal Header */}
       <div className="bg-emerald-950/50 border-b border-emerald-500/30 px-4 py-2 flex items-center justify-between">
-        <span className="text-emerald-400">terminal@{item.id}</span>
+        <span className="text-emerald-400">terminal@{cell.id}</span>
         <button 
           onClick={onClose}
           className="text-emerald-400 hover:text-emerald-300 transition-colors"
@@ -172,13 +173,13 @@ const ImageGallery = ({ onClose }: { onClose: () => void }) => {
 
 // --- Dummy Data for Recursion ---
 
-const experienceItems: BentoItem[] = [
+const experienceItems: TesseractCellData[] = [
   { 
     id: "cred", 
     title: "CRED", 
     subtitle: "Backend Intern", 
     content: <div className="text-zinc-500 text-xs">Wealth Management</div>,
-    rowSpan: 2  // EXAMPLE: This card is 2x height
+    rowSpan: 2 
   },
   { 
     id: "hpe", 
@@ -206,7 +207,7 @@ const experienceItems: BentoItem[] = [
   },
 ];
 
-const projectItems: BentoItem[] = [
+const projectItems: TesseractCellData[] = [
   { id: "stockpiece", title: "StockPiece", subtitle: "Fintech Game" },
   { id: "skilljourney", title: "Skill Journey", subtitle: "AI EdTech" },
   { id: "bots", title: "Community Bots", subtitle: "Automation" },
@@ -214,25 +215,25 @@ const projectItems: BentoItem[] = [
     id: "chat-terminal",
     title: "Chat Terminal",
     subtitle: "Interactive CLI",
-    // EXAMPLE: Custom expansion - opens terminal UI
-    renderExpanded: (props) => <TerminalUI {...props} />,
+    // Custom expansion - opens terminal UI
+    renderExpanded: ({ onClose, cell }) => <TerminalUI onClose={onClose} cell={cell} />,
   },
   {
     id: "snake",
     title: "Snake Game",
     subtitle: "Play Now!",
-    // EXAMPLE: Custom expansion - opens game
-    renderExpanded: (props) => <SnakeGame onClose={props.onClose} />,
+    // Custom expansion - opens game
+    renderExpanded: ({ onClose }) => <SnakeGame onClose={onClose} />,
   },
 ];
 
-const rootItems: BentoItem[] = [
+const rootItems: TesseractCellData[] = [
   { 
     id: "profile", 
     title: "Parth Gupta", 
     subtitle: "Full Stack Developer", 
     content: <div className="text-sm text-zinc-400 mt-2">Building things that matter.</div>,
-    rowSpan: 2  // EXAMPLE: Larger profile card
+    rowSpan: 2 
   },
   { 
     id: "exp", 
@@ -265,14 +266,13 @@ const rootItems: BentoItem[] = [
     id: "photos",
     title: "Photos",
     subtitle: "Gallery",
-    // EXAMPLE: Custom gallery expansion
-    renderExpanded: (props) => <ImageGallery onClose={props.onClose} />,
+    renderExpanded: ({ onClose }) => <ImageGallery onClose={onClose} />,
   },
   { 
     id: "extra", 
     title: "Extra", 
     subtitle: "More Stuff",
-    isLeaf: true,  // EXAMPLE: Can't be clicked/expanded
+    isLeaf: true, // Won't be clickable
     content: <div className="text-zinc-600 text-xs mt-2">This is a leaf node</div>
   },
   { 
@@ -297,7 +297,7 @@ export default function Home() {
       </div>
       
       <div className="w-full max-w-7xl h-[700px]">
-        <RecursiveGrid 
+        <Tesseract 
           items={rootItems} 
           path={path} 
           onNavigate={setPath} 
