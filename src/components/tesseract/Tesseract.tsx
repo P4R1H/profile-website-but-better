@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import { TesseractCellData, TesseractConfig } from "@/types";
 import { TesseractCell } from "./TesseractCell";
 
-// Type-safe processed cell with internal span markers
 type ProcessedCell = TesseractCellData & {
   _spanStart?: number;
   _actualColSpan?: number;
@@ -36,7 +35,6 @@ export const Tesseract = ({
   const collapseDuration = config.collapseDuration ?? 0.8;
 
   // OPTIMIZATION 1: Memoize column distribution
-  // Only recalculates when items or column count changes
   const distributedColumns = useMemo(() => {
     const dist: ProcessedCell[][] = Array.from({ length: columns }, () => []);
     const columnHeights = new Array(columns).fill(0);
@@ -46,12 +44,10 @@ export const Tesseract = ({
       const itemRowSpan = item.rowSpan ?? 1;
 
       if (itemColSpan === 1) {
-        // Single column item - find shortest column
         const minHeightIndex = columnHeights.indexOf(Math.min(...columnHeights));
         dist[minHeightIndex].push(item);
         columnHeights[minHeightIndex] += itemRowSpan;
       } else {
-        // Multi-column spanning item - find best consecutive span
         let bestStartCol = 0;
         let minSpanHeight = Infinity;
 
@@ -63,7 +59,6 @@ export const Tesseract = ({
           }
         }
 
-        // Mark item with span metadata
         const itemWithSpan: ProcessedCell = { 
           ...item, 
           _spanStart: bestStartCol, 
@@ -71,7 +66,6 @@ export const Tesseract = ({
         };
         dist[bestStartCol].push(itemWithSpan);
         
-        // Update all spanned column heights
         for (let i = 0; i < itemColSpan; i++) {
           columnHeights[bestStartCol + i] = minSpanHeight + itemRowSpan;
         }
@@ -90,7 +84,6 @@ export const Tesseract = ({
   const isLocked = !!activeId;
 
   // OPTIMIZATION 2: Pre-compute which column contains the active item
-  // Prevents O(n) search on every column render
   const activeColumnIndex = useMemo(() => {
     if (!activeId) return -1;
     return distributedColumns.findIndex(col => 
@@ -104,7 +97,6 @@ export const Tesseract = ({
       style={{ gap: `${gap}px` }}
     >
       {distributedColumns.map((colItems, colIndex) => {
-        // Determine if this column contains the active item
         const isColActive = colIndex === activeColumnIndex;
         const colFlex = isLocked 
           ? (isColActive ? 100 : 0.001)
@@ -115,7 +107,6 @@ export const Tesseract = ({
             key={colIndex}
             layout
             className="flex flex-col h-full overflow-hidden"
-            onMouseEnter={() => !isLocked && setHoveredColIndex(colIndex)}
             onMouseLeave={() => !isLocked && setHoveredColIndex(null)}
             style={{
               flex: colFlex,
@@ -134,8 +125,6 @@ export const Tesseract = ({
             }}
           >
             {colItems.map((cell) => {
-              // OPTIMIZATION 3: Inline style calculation
-              // Compute flex value based on state
               const rowMultiplier = cell.rowSpan || 1;
               const itemFlex = isLocked
                 ? (cell.id === activeId ? 100 : 0.001)
@@ -143,7 +132,6 @@ export const Tesseract = ({
                   ? rowMultiplier
                   : (hoveredItemId === cell.id ? 2 : 1) * rowMultiplier;
               
-              // Compute width for spanning items
               const span = cell._actualColSpan || cell.colSpan || 1;
               const cellStyle = span > 1
                 ? {
@@ -166,7 +154,17 @@ export const Tesseract = ({
                   expandDuration={expandDuration}
                   collapseDuration={collapseDuration}
                   style={cellStyle}
-                  onMouseEnter={() => !isLocked && !cell.disableHover && setHoveredItemId(cell.id)}
+                  onMouseEnter={() => {
+                    if (isLocked) return;
+                    
+                    if (cell.disableHover) {
+                        setHoveredColIndex(null);
+                        setHoveredItemId(null);
+                    } else {
+                        setHoveredColIndex(colIndex);
+                        setHoveredItemId(cell.id);
+                    }
+                  }}
                   onMouseLeave={() => !isLocked && setHoveredItemId(null)}
                 />
               );

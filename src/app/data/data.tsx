@@ -73,6 +73,7 @@ export const rootItems: TesseractCellData[] = [
     title: "Parth Gupta", 
     subtitle: "Full Stack Developer", 
     content: <div className="text-sm text-zinc-400 mt-2">Building things that matter.</div>,
+    disableHover: true
   },
   { 
     id: "exp", 
