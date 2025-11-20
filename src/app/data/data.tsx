@@ -1,5 +1,5 @@
 import { TesseractCellData } from '@/types';
-import { TerminalUI, SnakeGame, ImageGallery } from '../components';
+import { TerminalUI, SnakeGame, ImageGallery } from './components';
 
 export const experienceItems: TesseractCellData[] = [
   { 
