@@ -97,17 +97,23 @@ export const RecursiveGrid = ({
   };
 
   const getItemFlex = (item: BentoItem) => {
-    // Base size respects rowSpan (default 1)
-    const baseSize = (item.rowSpan || 1) * 150; // 150px per rowSpan unit
+    // Base flex multiplier from rowSpan (default 1)
+    const rowMultiplier = item.rowSpan || 1;
     
     if (isLocked) {
       // When locked, expanded item takes all space
       return item.id === activeId ? 100 : 0.001;
     }
     
-    // When hovering, grow more (flex-grow: 2) while respecting base size
-    const flexGrow = hoveredItemId === item.id ? 2 : 1;
-    return `${flexGrow} 1 ${baseSize}px`;
+    // Disable expansion if disableHover is true
+    if (item.disableHover) {
+      return rowMultiplier; // Static size based on rowSpan only
+    }
+    
+    // When hovering, double the flex-grow (original behavior)
+    // rowSpan acts as a multiplier: rowSpan:2 means 2x the base flex
+    const baseFlexGrow = hoveredItemId === item.id ? 2 : 1;
+    return baseFlexGrow * rowMultiplier;
   };
 
   return (
