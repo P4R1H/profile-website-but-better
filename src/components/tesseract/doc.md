@@ -3,16 +3,14 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [What's New](#whats-new)
-3. [Quick Start](#quick-start)
-4. [Core Concepts](#core-concepts)
-5. [Type Definitions](#type-definitions)
-6. [Configuration Options](#configuration-options)
-7. [Feature Examples](#feature-examples)
-8. [Advanced Patterns](#advanced-patterns)
-9. [Animation System](#animation-system)
-10. [Best Practices](#best-practices)
-11. [API Reference](#api-reference)
+2. [Quick Start](#quick-start)
+3. [Core Concepts](#core-concepts)
+4. [Type Definitions](#type-definitions)
+5. [Configuration Options](#configuration-options)
+6. [Feature Examples](#feature-examples)
+7. [Advanced Patterns](#advanced-patterns)
+8. [Animation System](#animation-system)
+9. [Best Practices](#best-practices)
 
 -----
 
@@ -23,38 +21,12 @@ Tesseract is a recursive, animated grid system designed for complex hierarchical
 **Key Capabilities:**
 
 * **Infinite Recursion:** Nested grids to arbitrary depths.
-* **Variable Dimensions:** Support for items spanning multiple rows AND columns (NEW!).
-* **Configurable Layout:** Adjustable column count, gaps, and animation timings (NEW!).
+* **Variable Dimensions:** Support for items spanning multiple rows AND columns.
+* **Configurable Layout:** Adjustable column count, gaps, and animation timings.
 * **Polymorphic Expansion:** Items can expand into nested grids or custom React components.
 * **State-Driven Navigation:** Path-based routing compatible with deep linking.
 * **Performance:** Optimized rendering with Framer Motion layout projection.
-* **Smooth Animations:** Zero jitter on all expansion types including custom components (FIXED!).
-
------
-
-## What's New
-
-### Version 2.0 Enhancements
-
-#### 🎛️ Configurable Columns
-- No longer hardcoded to 3 columns
-- Configurable via `config.columns` prop
-- Supports any number of columns (2, 3, 4, 5, etc.)
-
-#### 📏 colSpan Support
-- Items can now span multiple columns horizontally
-- Intelligent distribution algorithm respects colSpan
-- Works alongside rowSpan for full 2D control
-
-#### 🎭 Smooth Custom Component Animations
-- **Fixed:** Custom `renderExpanded` components no longer jitter on close
-- Added proper layout preservation wrapper
-- Matches the smooth animation quality of nested grids
-
-#### ⚡ Animation Customization
-- Configurable expand/collapse durations
-- Configurable gap sizes
-- Per-instance configuration via `config` prop
+* **Smooth Animations:** Zero jitter on all expansion types including custom components.
 
 -----
 
@@ -235,7 +207,7 @@ config={{
 }
 ```
 
-### 3. Multi-Column Item (colSpan) - NEW!
+### 3. Multi-Column Item (colSpan)
 
 ```typescript
 {
@@ -246,7 +218,7 @@ config={{
 }
 ```
 
-### 4. Combined Spanning - NEW!
+### 4. Combined Spanning
 
 ```typescript
 {
@@ -357,7 +329,7 @@ The animation logic uses CSS Flexbox transitions via Framer Motion.
 * Collapse: `duration: 0.8s` (default)
 * Opacity: Delays applied to ensure layout stabilizes
 
-### Custom Component Handling (FIXED!)
+### Custom Component Handling
 
 Custom `renderExpanded` components are now wrapped in:
 ```typescript
@@ -402,45 +374,6 @@ Ensure `id`s are unique at each tree level to prevent animation glitches.
 
 -----
 
-## API Reference
-
-### Tesseract Component
-
-```typescript
-interface TesseractProps {
-  items: TesseractCellData[];        // Data array
-  path: string[];                    // Navigation state
-  onNavigate: (path: string[]) => void; // State setter
-  className?: string;                // Optional styling
-  config?: TesseractConfig;          // Configuration object (NEW!)
-  level?: number;                    // Internal: recursion depth
-}
-```
-
-### TesseractConfig Object
-
-```typescript
-interface TesseractConfig {
-  columns?: number;           // Default: 3
-  gap?: number;              // Default: 8 (pixels)
-  expandDuration?: number;   // Default: 1.2 (seconds)
-  collapseDuration?: number; // Default: 0.8 (seconds)
-}
-```
-
-### Breadcrumb Component
-
-```typescript
-interface BreadcrumbProps {
-  path: string[];
-  rootItems: TesseractCellData[];
-  onNavigate: (path: string[]) => void;
-  className?: string;
-}
-```
-
------
-
 ## Complete Implementation Example
 
 ```typescript
@@ -457,7 +390,7 @@ const rootItems: TesseractCellData[] = [
     title: "Welcome", 
     subtitle: "Start Here",
     rowSpan: 2,
-    colSpan: 2, // NEW: Spans 2 columns!
+    colSpan: 2,
     content: <div className="text-lg">Featured content</div>
   },
   { 
@@ -471,7 +404,7 @@ const rootItems: TesseractCellData[] = [
   { 
     id: "logs", 
     title: "System Logs",
-    colSpan: 2, // NEW: Wide component
+    colSpan: 2, 
     renderExpanded: ({ onClose }) => (
       <div className="w-full h-full bg-zinc-900 p-4">
         <button onClick={onClose}>Close</button>
@@ -510,45 +443,8 @@ export default function Interface() {
     </main>
   );
 }
+
 ```
-
------
-
-## Migration Guide
-
-### From v1.0 to v2.0
-
-#### No Breaking Changes!
-All existing code continues to work. New features are opt-in.
-
-#### To Use New Features:
-
-**Add colSpan:**
-```typescript
-// Before
-{ id: "item", title: "Item" }
-
-// After
-{ id: "item", title: "Item", colSpan: 2 }
-```
-
-**Customize configuration:**
-```typescript
-// Before
-<Tesseract items={items} path={path} onNavigate={setPath} />
-
-// After
-<Tesseract 
-  items={items} 
-  path={path} 
-  onNavigate={setPath}
-  config={{ columns: 4, gap: 16 }}
-/>
-```
-
-**That's it!** The jitter fix applies automatically to all custom components.
-
------
 
 ## Troubleshooting
 
