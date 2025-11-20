@@ -1,10 +1,26 @@
 "use client";
 
-import React from "react";
+import React, { createContext, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { TesseractCellData } from "@/types";
 import { Tesseract } from "./Tesseract";
+
+type CellContextType = {
+  isHovered: boolean;
+  isLocked: boolean;
+  isActive: boolean;
+};
+
+const CellContext = createContext<CellContextType>({
+  isHovered: false,
+  isLocked: false,
+  isActive: false,
+});
+
+// --- 2. HOOK EXPORT ---
+// Import this hook in your content components to detect hover/lock state.
+export const useCellState = () => useContext(CellContext);
 
 interface TesseractCellProps {
   cell: TesseractCellData;
@@ -84,27 +100,30 @@ export const TesseractCell = ({
         animate={{ opacity: isActive ? 0 : 1 }}
         transition={{ opacity: { duration: 0.8 } }}
       >
-        <motion.div layout="position" className="flex flex-col gap-2 min-w-[200px]">
-          <motion.h3 
-            layout="position"
-            className="text-zinc-100 font-bold uppercase tracking-tight text-lg"
-          >
-            {cell.title}
-          </motion.h3>
-          
-          {cell.subtitle && (
-            <motion.p 
+        {/* PROVIDER WRAPPER: Synchronizes state with all children */}
+        <CellContext.Provider value={{ isHovered, isLocked, isActive }}>
+          <motion.div layout="position" className="flex flex-col gap-2 min-w-[200px] pointer-events-auto">
+            <motion.h3 
               layout="position"
-              className="text-zinc-500 font-mono text-xs uppercase"
+              className="text-zinc-100 font-bold uppercase tracking-tight text-lg"
             >
-              {cell.subtitle}
-            </motion.p>
-          )}
-          
-          <motion.div layout="position">
-              {cell.content}
+              {cell.title}
+            </motion.h3>
+            
+            {cell.subtitle && (
+              <motion.p 
+                layout="position"
+                className="text-zinc-500 font-mono text-xs uppercase"
+              >
+                {cell.subtitle}
+              </motion.p>
+            )}
+            
+            <motion.div layout="position">
+                {cell.content}
+            </motion.div>
           </motion.div>
-        </motion.div>
+        </CellContext.Provider>
       </motion.div>
 
       {/* Expanded View Content */}
@@ -126,16 +145,16 @@ export const TesseractCell = ({
           >
             <div className="flex-1 min-h-0 overflow-hidden">
               {cell.renderExpanded ? (
-                // Wrap custom components in a layout-aware container to prevent jitter
                 <motion.div
                   layout="preserve-aspect"
                   className="w-full h-full"
-                  initial={{ scale: 0.95 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0.95 }}
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ opacity: 0 }} 
                   transition={{
                     layout: { duration: collapseDuration, ease: [0.22, 1, 0.36, 1] },
-                    scale: { duration: 0.3, ease: "easeOut" }
+                    scale: { duration: 0.4, ease: "easeOut" },
+                    opacity: { duration: 0.2 } 
                   }}
                 >
                   {cell.renderExpanded({
@@ -144,7 +163,6 @@ export const TesseractCell = ({
                   })}
                 </motion.div>
               ) : (
-                // RECURSIVE CALL - nested grids don't need the wrapper
                 <Tesseract 
                   items={cell.children || []}
                   path={path.slice(1)} 

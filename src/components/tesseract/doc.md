@@ -230,7 +230,7 @@ config={{
 }
 ```
 
-### 5. Custom UI Expansion (Now Jitter-Free!)
+### 5. Custom UI Expansion 
 
 ```typescript
 {
@@ -243,9 +243,9 @@ config={{
     />
   )
 }
-```
 
-The custom component will now collapse smoothly without any jitter!
+```
+Refer to native.md for guide to make performant components.
 
 ### 6. Static/Leaf Nodes
 
@@ -259,6 +259,31 @@ The custom component will now collapse smoothly without any jitter!
 }
 ```
 
+### 7. Reactive Internal Content (Hooks)
+Use the useCellState hook to access the cell's hover/lock state. This eliminates "padding lag" and ensures your component animates exactly when the grid does.
+
+```
+import { useCellState } from '@/components/tesseract/TesseractCell';
+
+const SmartButton = () => {
+  const { isHovered } = useCellState(); // <--- Hook into parent state
+
+  return (
+    <div className={`transition-all duration-500 ${
+      isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+    }`}>
+      <button>View Details →</button>
+    </div>
+  );
+};
+
+// Usage in data
+{
+  id: "feature",
+  title: "Smart Feature",
+  content: <SmartButton />
+}
+```
 -----
 
 ## Advanced Patterns
