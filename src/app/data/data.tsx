@@ -1,5 +1,5 @@
 import { TesseractCellData } from '@/types';
-import { TerminalUI, SnakeGame, ImageGallery } from './components';
+import { TerminalUI, SnakeGame, SystemMonitor } from './components';
 
 export const experienceItems: TesseractCellData[] = [
   { 
@@ -73,7 +73,6 @@ export const rootItems: TesseractCellData[] = [
     title: "Parth Gupta", 
     subtitle: "Full Stack Developer", 
     content: <div className="text-sm text-zinc-400 mt-2">Building things that matter.</div>,
-    rowSpan: 2 
   },
   { 
     id: "exp", 
@@ -103,10 +102,10 @@ export const rootItems: TesseractCellData[] = [
     subtitle: "Thoughts" 
   },
   {
-    id: "photos",
-    title: "Photos",
-    subtitle: "Gallery",
-    renderExpanded: ({ onClose }) => <ImageGallery onClose={onClose} />,
+    id: "systemmonitor",
+    title: "SystemMonitor",
+    subtitle: "SystemMonitor",
+    renderExpanded: ({ onClose }) => <SystemMonitor onClose={onClose} />,
   },
   { 
     id: "extra", 
