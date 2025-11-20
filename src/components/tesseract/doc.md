@@ -1,17 +1,18 @@
-# Tesseract - Technical Documentation
+# Tesseract - Enhanced Technical Documentation
 
 ## Table of Contents
 
-1.  [Overview](https://www.google.com/search?q=%23overview)
-2.  [File Structure](https://www.google.com/search?q=%23file-structure)
-3.  [Quick Start](https://www.google.com/search?q=%23quick-start)
-4.  [Core Concepts](https://www.google.com/search?q=%23core-concepts)
-5.  [Type Definitions](https://www.google.com/search?q=%23type-definitions)
-6.  [Feature Examples](https://www.google.com/search?q=%23feature-examples)
-7.  [Advanced Patterns](https://www.google.com/search?q=%23advanced-patterns)
-8.  [Animation System](https://www.google.com/search?q=%23animation-system)
-9.  [Best Practices](https://www.google.com/search?q=%23best-practices)
-10. [API Reference](https://www.google.com/search?q=%23api-reference)
+1. [Overview](#overview)
+2. [What's New](#whats-new)
+3. [Quick Start](#quick-start)
+4. [Core Concepts](#core-concepts)
+5. [Type Definitions](#type-definitions)
+6. [Configuration Options](#configuration-options)
+7. [Feature Examples](#feature-examples)
+8. [Advanced Patterns](#advanced-patterns)
+9. [Animation System](#animation-system)
+10. [Best Practices](#best-practices)
+11. [API Reference](#api-reference)
 
 -----
 
@@ -21,22 +22,39 @@ Tesseract is a recursive, animated grid system designed for complex hierarchical
 
 **Key Capabilities:**
 
-  * **Infinite Recursion:** Nested grids to arbitrary depths.
-  * **Variable Dimensions:** Support for items spanning multiple rows.
-  * **Polymorphic Expansion:** Items can expand into nested grids or custom React components (forms, terminals, dashboards).
-  * **State-Driven Navigation:** Path-based routing compatible with deep linking.
-  * **Performance:** Optimized rendering with Framer Motion layout projection.
+* **Infinite Recursion:** Nested grids to arbitrary depths.
+* **Variable Dimensions:** Support for items spanning multiple rows AND columns (NEW!).
+* **Configurable Layout:** Adjustable column count, gaps, and animation timings (NEW!).
+* **Polymorphic Expansion:** Items can expand into nested grids or custom React components.
+* **State-Driven Navigation:** Path-based routing compatible with deep linking.
+* **Performance:** Optimized rendering with Framer Motion layout projection.
+* **Smooth Animations:** Zero jitter on all expansion types including custom components (FIXED!).
 
 -----
 
-## File Structure
+## What's New
 
-The component is architected using separation of concerns to ensure maintainability.
+### Version 2.0 Enhancements
 
-  * **`types.ts`**: Contains shared interfaces (`TesseractCellData`) to prevent circular dependencies.
-  * **`TesseractCell.tsx`**: The presentation component responsible for rendering individual cards and handling local interaction events.
-  * **`Tesseract.tsx`**: The orchestration component that manages the grid layout, column distribution, and global state.
-  * **`index.ts`**: Barrel file for clean imports.
+#### 🎛️ Configurable Columns
+- No longer hardcoded to 3 columns
+- Configurable via `config.columns` prop
+- Supports any number of columns (2, 3, 4, 5, etc.)
+
+#### 📏 colSpan Support
+- Items can now span multiple columns horizontally
+- Intelligent distribution algorithm respects colSpan
+- Works alongside rowSpan for full 2D control
+
+#### 🎭 Smooth Custom Component Animations
+- **Fixed:** Custom `renderExpanded` components no longer jitter on close
+- Added proper layout preservation wrapper
+- Matches the smooth animation quality of nested grids
+
+#### ⚡ Animation Customization
+- Configurable expand/collapse durations
+- Configurable gap sizes
+- Per-instance configuration via `config` prop
 
 -----
 
@@ -46,7 +64,7 @@ The component is architected using separation of concerns to ensure maintainabil
 
 ```typescript
 import { Tesseract } from '@/components/tesseract';
-import { TesseractCellData } from '@/components/tesseract/types';
+import { TesseractCellData } from '@/types';
 import { useState } from 'react';
 
 const items: TesseractCellData[] = [
@@ -64,6 +82,7 @@ export default function Page() {
         items={items}
         path={path}
         onNavigate={setPath}
+        config={{ columns: 3 }} // Optional configuration
       />
     </div>
   );
@@ -74,31 +93,40 @@ export default function Page() {
 
 ## Core Concepts
 
-### 1\. Column Distribution
+### 1. Intelligent Column Distribution
 
-The grid automatically distributes items into 3 vertical columns using a modulo operation. This ensures a balanced layout regardless of the number of items.
+The grid automatically distributes items into N columns (configurable) using an intelligent algorithm that:
+- Balances column heights
+- Respects `colSpan` and `rowSpan` values
+- Optimally places multi-column items
 
-### 2\. Path-Based Navigation
+### 2. Path-Based Navigation
 
-Navigation is controlled by a string array representing the current hierarchy. This allows the grid to know exactly which item is active and at what depth.
+Navigation is controlled by a string array representing the current hierarchy:
 
-  * `[]`: Root level
-  * `['projects']`: Inside "projects" node
-  * `['projects', 'backend']`: Inside "backend" node within "projects"
+* `[]`: Root level
+* `['projects']`: Inside "projects" node
+* `['projects', 'backend']`: Inside "backend" node within "projects"
 
-### 3\. Expansion Logic
+### 3. Expansion Logic
 
 Items exist in three states:
 
-1.  **Idle:** Displays title, subtitle, and summary content.
-2.  **Hover:** Expands vertically (2x flex-grow) to reveal more detail (unless disabled).
-3.  **Active:** Expands to fill the parent container (100x flex-grow), rendering either `children` (nested grid) or `renderExpanded` (custom UI).
+1. **Idle:** Displays title, subtitle, and summary content.
+2. **Hover:** Expands vertically (2x flex-grow) to reveal more detail.
+3. **Active:** Expands to fill the parent container, rendering either `children` or `renderExpanded`.
+
+### 4. Two-Dimensional Spanning
+
+Items can now control their size in both dimensions:
+- **rowSpan:** Vertical height multiplier (e.g., `rowSpan: 2` = 2x taller)
+- **colSpan:** Horizontal width multiplier (e.g., `colSpan: 2` = spans 2 columns)
 
 -----
 
 ## Type Definitions
 
-The core data structure is `TesseractCellData`.
+### TesseractCellData
 
 ```typescript
 interface TesseractCellData {
@@ -110,15 +138,15 @@ interface TesseractCellData {
   subtitle?: string;         // Secondary text
   content?: React.ReactNode; // Collapsed view content
   
-  // Layout
+  // Layout (NEW: colSpan now functional!)
   rowSpan?: number;          // Vertical height multiplier (Default: 1)
-  colSpan?: number;          // Reserved for future use
+  colSpan?: number;          // Horizontal width multiplier (Default: 1)
   
   // Recursion
   children?: TesseractCellData[]; // Nested grid items
   
   // Custom Expansion
-  renderExpanded?: (props: {      // Custom UI renderer
+  renderExpanded?: (props: {
     onClose: () => void;
     cell: TesseractCellData;
   }) => React.ReactNode;
@@ -132,13 +160,58 @@ interface TesseractCellData {
 }
 ```
 
+### TesseractConfig (NEW!)
+
+```typescript
+interface TesseractConfig {
+  columns?: number;           // Number of columns (default: 3)
+  gap?: number;              // Gap between items in pixels (default: 8)
+  expandDuration?: number;   // Expansion duration in seconds (default: 1.2)
+  collapseDuration?: number; // Collapse duration in seconds (default: 0.8)
+}
+```
+
+-----
+
+## Configuration Options
+
+### Column Count
+
+Adjust the number of columns to suit your layout:
+
+```typescript
+<Tesseract 
+  items={items}
+  path={path}
+  onNavigate={setPath}
+  config={{ columns: 4 }} // 4 columns instead of default 3
+/>
+```
+
+### Gap Sizing
+
+Control spacing between grid items:
+
+```typescript
+config={{ gap: 16 }} // Larger gaps (default: 8px)
+```
+
+### Animation Timing
+
+Fine-tune animation speeds:
+
+```typescript
+config={{
+  expandDuration: 1.5,    // Slower expansion (default: 1.2)
+  collapseDuration: 0.6,  // Faster collapse (default: 0.8)
+}}
+```
+
 -----
 
 ## Feature Examples
 
-### 1\. Nested Grid (Recursion)
-
-To create a folder-like structure, provide an array of items to the `children` property.
+### 1. Nested Grid (Recursion)
 
 ```typescript
 {
@@ -151,22 +224,41 @@ To create a folder-like structure, provide an array of items to the `children` p
 }
 ```
 
-### 2\. Custom Dimensions
-
-Use `rowSpan` to emphasize specific items. A `rowSpan` of 2 makes the item twice as tall as standard items.
+### 2. Multi-Row Item (rowSpan)
 
 ```typescript
 {
   id: "analytics",
   title: "Weekly Analytics",
-  rowSpan: 2, 
+  rowSpan: 2, // 2x vertical height
   content: <GraphPreview />
 }
 ```
 
-### 3\. Custom UI Expansion
+### 3. Multi-Column Item (colSpan) - NEW!
 
-Use `renderExpanded` to break out of the grid layout and render a full component (e.g., a Terminal, Form, or Canvas).
+```typescript
+{
+  id: "dashboard",
+  title: "Wide Dashboard",
+  colSpan: 2, // Spans 2 columns horizontally
+  content: <DashboardPreview />
+}
+```
+
+### 4. Combined Spanning - NEW!
+
+```typescript
+{
+  id: "hero",
+  title: "Hero Section",
+  rowSpan: 2,  // 2x taller
+  colSpan: 2,  // 2x wider
+  content: <HeroContent />
+}
+```
+
+### 5. Custom UI Expansion (Now Jitter-Free!)
 
 ```typescript
 {
@@ -181,9 +273,9 @@ Use `renderExpanded` to break out of the grid layout and render a full component
 }
 ```
 
-### 4\. Static/Leaf Nodes
+The custom component will now collapse smoothly without any jitter!
 
-Use `isLeaf` for items that convey information but should not trigger navigation. Use `disableHover` to prevent the layout shift effect on interaction.
+### 6. Static/Leaf Nodes
 
 ```typescript
 {
@@ -199,15 +291,37 @@ Use `isLeaf` for items that convey information but should not trigger navigation
 
 ## Advanced Patterns
 
-### Dynamic Data Loading
+### Responsive Column Count
 
-You can map API responses directly to `TesseractCellData`.
+Adjust columns based on viewport:
+
+```typescript
+const [columns, setColumns] = useState(3);
+
+useEffect(() => {
+  const handleResize = () => {
+    if (window.innerWidth < 768) setColumns(1);
+    else if (window.innerWidth < 1200) setColumns(2);
+    else setColumns(3);
+  };
+  
+  handleResize();
+  window.addEventListener('resize', handleResize);
+  return () => window.removeEventListener('resize', handleResize);
+}, []);
+
+return <Tesseract config={{ columns }} {...props} />;
+```
+
+### Dynamic Data Loading
 
 ```typescript
 const mapApiToGrid = (data: ApiResponse[]): TesseractCellData[] => {
   return data.map(item => ({
     id: item.uuid,
     title: item.name,
+    colSpan: item.featured ? 2 : 1, // Featured items span 2 columns
+    rowSpan: item.priority === 'high' ? 2 : 1,
     children: item.hasSubItems ? mapApiToGrid(item.subItems) : undefined
   }));
 };
@@ -215,39 +329,76 @@ const mapApiToGrid = (data: ApiResponse[]): TesseractCellData[] => {
 
 ### Mixed Content Types
 
-The grid handles mixed content gracefully. You can have a folder (nested grid), a leaf node (static info), and an application (custom expanded view) all at the same hierarchy level.
+The grid handles mixed content gracefully:
+- Folders (nested grids)
+- Leaf nodes (static info)
+- Applications (custom expanded views)
+- Wide items (colSpan > 1)
+- Tall items (rowSpan > 1)
 
-### Breadcrumb Integration
-
-The `Breadcrumb` component utilizes a drill-down lookup strategy to resolve titles from IDs, ensuring O(N) performance relative to path depth rather than tree size.
+All at the same hierarchy level!
 
 -----
 
 ## Animation System
 
-The animation logic relies on CSS Flexbox transition via Framer Motion.
+The animation logic uses CSS Flexbox transitions via Framer Motion.
 
-1.  **Flex-Grow Transition:**
+### Flex-Grow Transition
 
-      * Idle items have `flex: 1`.
-      * Hovered items have `flex: 2`.
-      * Active items have `flex: 100`.
-      * Siblings of active items have `flex: 0.001`.
+* Idle items: `flex: 1`
+* Hovered items: `flex: 2`
+* Active items: `flex: 100`
+* Siblings of active: `flex: 0.001`
 
-2.  **Timing:**
+### Timing (Configurable!)
 
-      * Expansion: `duration: 1.2s`, `ease: [0.22, 1, 0.36, 1]`
-      * Collapse: `duration: 0.8s`
-      * Opacity: Delays are applied to content entry to ensure layout stabilizes before text appears.
+* Expansion: `duration: 1.2s` (default), `ease: [0.22, 1, 0.36, 1]`
+* Collapse: `duration: 0.8s` (default)
+* Opacity: Delays applied to ensure layout stabilizes
+
+### Custom Component Handling (FIXED!)
+
+Custom `renderExpanded` components are now wrapped in:
+```typescript
+<motion.div
+  layout="preserve"
+  initial={{ scale: 0.95 }}
+  animate={{ scale: 1 }}
+  exit={{ scale: 0.95 }}
+/>
+```
+
+This prevents jitter during collapse by:
+1. Preserving layout during animation
+2. Adding subtle scale transitions
+3. Coordinating with parent flex transitions
 
 -----
 
 ## Best Practices
 
-1.  **Container Sizing:** The parent of `<Tesseract />` must have a defined height (fixed pixels or percentage) because the grid uses `h-full`.
-2.  **Custom Expansion Layout:** When using `renderExpanded`, the returned component should generally use `w-full h-full` to fill the expanded card area.
-3.  **Close Handlers:** Always ensure your custom expanded components trigger the `onClose` callback provided in the props, otherwise the user will be trapped in the expanded state.
-4.  **Key Stability:** Ensure `id`s are unique at their specific tree level to prevent animation glitches.
+### 1. Container Sizing
+The parent of `<Tesseract />` must have a defined height.
+
+### 2. colSpan Guidelines
+- Use `colSpan` sparingly for featured/important items
+- Keep `colSpan` values reasonable (≤ total columns)
+- Consider responsive column counts with colSpan
+
+### 3. Custom Expansion Layout
+When using `renderExpanded`:
+- Return components that use `w-full h-full`
+- Ensure `onClose` callback is wired up
+- Avoid complex animations that conflict with Tesseract's
+
+### 4. Key Stability
+Ensure `id`s are unique at each tree level to prevent animation glitches.
+
+### 5. Performance
+- For grids with 50+ items, consider virtualization
+- Use `React.memo` on custom renderExpanded components
+- Keep rowSpan/colSpan values reasonable
 
 -----
 
@@ -261,6 +412,19 @@ interface TesseractProps {
   path: string[];                    // Navigation state
   onNavigate: (path: string[]) => void; // State setter
   className?: string;                // Optional styling
+  config?: TesseractConfig;          // Configuration object (NEW!)
+  level?: number;                    // Internal: recursion depth
+}
+```
+
+### TesseractConfig Object
+
+```typescript
+interface TesseractConfig {
+  columns?: number;           // Default: 3
+  gap?: number;              // Default: 8 (pixels)
+  expandDuration?: number;   // Default: 1.2 (seconds)
+  collapseDuration?: number; // Default: 0.8 (seconds)
 }
 ```
 
@@ -283,17 +447,18 @@ interface BreadcrumbProps {
 "use client";
 
 import { Tesseract } from '@/components/tesseract';
-import { TesseractCellData } from '@/components/tesseract/types';
+import { TesseractCellData } from '@/types';
 import { Breadcrumb } from '@/components/breadcrumb';
 import { useState } from 'react';
 
-// Mock Data
 const rootItems: TesseractCellData[] = [
   { 
-    id: "dashboard", 
-    title: "Dashboard", 
-    subtitle: "Overview",
-    rowSpan: 2 
+    id: "hero", 
+    title: "Welcome", 
+    subtitle: "Start Here",
+    rowSpan: 2,
+    colSpan: 2, // NEW: Spans 2 columns!
+    content: <div className="text-lg">Featured content</div>
   },
   { 
     id: "settings", 
@@ -305,14 +470,12 @@ const rootItems: TesseractCellData[] = [
   },
   { 
     id: "logs", 
-    title: "System Logs", 
+    title: "System Logs",
+    colSpan: 2, // NEW: Wide component
     renderExpanded: ({ onClose }) => (
       <div className="w-full h-full bg-zinc-900 p-4">
-        <div className="flex justify-between mb-4">
-          <h2 className="text-white">Logs</h2>
-          <button onClick={onClose} className="text-red-400">Close</button>
-        </div>
-        <pre className="text-green-400 font-mono text-sm">System initialized...</pre>
+        <button onClick={onClose}>Close</button>
+        <pre className="text-green-400">System initialized...</pre>
       </div>
     )
   }
@@ -323,8 +486,7 @@ export default function Interface() {
 
   return (
     <main className="min-h-screen bg-black p-8 flex flex-col items-center justify-center">
-      {/* Navigation Header */}
-      <div className="w-full max-w-7xl mb-4 h-8 flex items-center">
+      <div className="w-full max-w-7xl mb-4 h-8">
         <Breadcrumb 
           path={path} 
           rootItems={rootItems} 
@@ -332,14 +494,72 @@ export default function Interface() {
         />
       </div>
       
-      {/* Main Interface */}
       <div className="w-full max-w-7xl h-[700px]">
         <Tesseract 
           items={rootItems} 
           path={path} 
-          onNavigate={setPath} 
+          onNavigate={setPath}
+          config={{
+            columns: 3,           // Try 2, 4, or 5!
+            gap: 12,              // Larger gaps
+            expandDuration: 1.4,  // Slower expansion
+            collapseDuration: 0.7 // Faster collapse
+          }}
         />
       </div>
     </main>
   );
 }
+```
+
+-----
+
+## Migration Guide
+
+### From v1.0 to v2.0
+
+#### No Breaking Changes!
+All existing code continues to work. New features are opt-in.
+
+#### To Use New Features:
+
+**Add colSpan:**
+```typescript
+// Before
+{ id: "item", title: "Item" }
+
+// After
+{ id: "item", title: "Item", colSpan: 2 }
+```
+
+**Customize configuration:**
+```typescript
+// Before
+<Tesseract items={items} path={path} onNavigate={setPath} />
+
+// After
+<Tesseract 
+  items={items} 
+  path={path} 
+  onNavigate={setPath}
+  config={{ columns: 4, gap: 16 }}
+/>
+```
+
+**That's it!** The jitter fix applies automatically to all custom components.
+
+-----
+
+## Troubleshooting
+
+### Q: colSpan items don't look right?
+A: Ensure your column count supports the colSpan (e.g., colSpan: 3 in a 2-column grid won't work properly).
+
+### Q: Still seeing jitter on custom components?
+A: Ensure your custom component doesn't have conflicting animations or complex layout shifts. Use simple, flex-based layouts.
+
+### Q: Performance issues with many items?
+A: Consider reducing column count, using smaller gap values, or implementing virtualization for 100+ items.
+
+### Q: Animations too fast/slow?
+A: Adjust `expandDuration` and `collapseDuration` in the config object to your preference.

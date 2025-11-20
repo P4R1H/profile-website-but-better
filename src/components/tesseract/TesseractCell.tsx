@@ -4,7 +4,7 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { TesseractCellData } from "@/types";
-import { Tesseract } from "./Tesseract"; // Import Grid for recursion
+import { Tesseract } from "./Tesseract";
 
 interface TesseractCellProps {
   cell: TesseractCellData;
@@ -12,8 +12,10 @@ interface TesseractCellProps {
   onNavigate: (newPath: string[]) => void;
   activeId: string | undefined;
   isLocked: boolean;
-  isHovered: boolean; // Passed down from parent
+  isHovered: boolean;
   level: number;
+  expandDuration: number;
+  collapseDuration: number;
   style?: React.CSSProperties;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
@@ -27,12 +29,13 @@ export const TesseractCell = ({
   isLocked,
   isHovered,
   level,
+  expandDuration,
+  collapseDuration,
   style,
   onMouseEnter,
   onMouseLeave,
 }: TesseractCellProps) => {
   const isActive = cell.id === activeId;
-  // Determine if we can expand (must have children OR a custom render, and not be a leaf)
   const canExpand = !cell.isLeaf && (cell.renderExpanded || (cell.children && cell.children.length > 0));
 
   const handleClick = () => {
@@ -66,7 +69,7 @@ export const TesseractCell = ({
         opacity: isLocked && !isActive ? 0 : 1,
       }}
       transition={{ 
-        layout: { duration: isLocked ? 1.2 : 0.8, ease: [0.22, 1, 0.36, 1] },
+        layout: { duration: isLocked ? expandDuration : collapseDuration, ease: [0.22, 1, 0.36, 1] },
         opacity: { duration: 0.3, delay: isLocked ? 0.9 : 0 }
       }}
       onMouseEnter={onMouseEnter}
@@ -108,24 +111,49 @@ export const TesseractCell = ({
       <AnimatePresence mode="wait">
         {isActive && (
           <motion.div
+            key="expanded-content"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: { duration: 0.8, delay: 0.2 } }}
-            exit={{ opacity: 0, transition: { duration: 0.2 } }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{
+              opacity: { 
+                duration: 0.8, 
+                delay: isActive ? 0.2 : 0,
+                ease: "easeInOut"
+              }
+            }}
             className="absolute inset-0 z-20 flex flex-col"
           >
-            <div className="flex-1 min-h-0">
+            <div className="flex-1 min-h-0 overflow-hidden">
               {cell.renderExpanded ? (
-                cell.renderExpanded({
-                  onClose: () => onNavigate(path.slice(0, -1)),
-                  cell: cell,
-                })
+                // Wrap custom components in a layout-aware container to prevent jitter
+                <motion.div
+                  layout="preserve-aspect"
+                  className="w-full h-full"
+                  initial={{ scale: 0.95 }}
+                  animate={{ scale: 1 }}
+                  exit={{ scale: 0.95 }}
+                  transition={{
+                    layout: { duration: collapseDuration, ease: [0.22, 1, 0.36, 1] },
+                    scale: { duration: 0.3, ease: "easeOut" }
+                  }}
+                >
+                  {cell.renderExpanded({
+                    onClose: () => onNavigate(path.slice(0, -1)),
+                    cell: cell,
+                  })}
+                </motion.div>
               ) : (
-                // RECURSIVE CALL
+                // RECURSIVE CALL - nested grids don't need the wrapper
                 <Tesseract 
                   items={cell.children || []}
                   path={path.slice(1)} 
                   onNavigate={(subPath) => onNavigate([cell.id, ...subPath])}
                   level={level + 1}
+                  config={{
+                    expandDuration,
+                    collapseDuration,
+                  }}
                 />
               )}
             </div>
