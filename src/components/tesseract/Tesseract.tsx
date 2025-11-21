@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { TesseractCellData, TesseractConfig } from "@/types";
@@ -91,6 +91,17 @@ export const Tesseract = ({
     );
   }, [activeId, distributedColumns]);
 
+  const columnRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    if (isLocked && activeColumnIndex !== -1) {
+      const activeCol = columnRefs.current[activeColumnIndex];
+      if (activeCol) {
+        activeCol.scrollTop = 0;
+      }
+    }
+  }, [isLocked, activeColumnIndex]);
+
   const isMobile = columns === 1;
 
   return (
@@ -115,6 +126,7 @@ export const Tesseract = ({
         return (
           <motion.div
             key={colIndex}
+            ref={(el) => { columnRefs.current[colIndex] = el; }}
             layout
             className={cn(
               "flex flex-col",
