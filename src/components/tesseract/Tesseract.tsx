@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { TesseractCellData, TesseractConfig } from "@/types";
 import { TesseractCell } from "./TesseractCell";
+import { useMobile, useResponsiveColumns } from "@/hooks/useMobile";
+import { ScrollBlur } from "./ScrollBlur";
 
 type ProcessedCell = TesseractCellData & {
   _spanStart?: number;
@@ -28,9 +30,14 @@ export const Tesseract = ({
   className,
   config = {},
 }: TesseractProps) => {
+  // Mobile detection
+  const isMobile = useMobile();
+
   // Extract configuration with defaults
-  const columns = config.columns ?? 3;
-  const gap = config.gap ?? 8;
+  const baseColumns = config.columns ?? 3;
+  const responsiveColumns = useResponsiveColumns(baseColumns);
+  const columns = responsiveColumns;
+  const gap = config.gap ?? (isMobile ? 12 : 8);
   const expandDuration = config.expandDuration ?? 1.2;
   const collapseDuration = config.collapseDuration ?? 0.8;
 
@@ -98,7 +105,7 @@ export const Tesseract = ({
     >
       {distributedColumns.map((colItems, colIndex) => {
         const isColActive = colIndex === activeColumnIndex;
-        const colFlex = isLocked 
+        const colFlex = isLocked
           ? (isColActive ? 100 : 0.001)
           : (hoveredColIndex === colIndex ? 2 : 1);
 
@@ -106,25 +113,31 @@ export const Tesseract = ({
           <motion.div
             key={colIndex}
             layout
-            className="flex flex-col h-full overflow-hidden"
+            className={cn(
+              "h-full",
+              isMobile ? "" : "flex flex-col overflow-hidden"
+            )}
             onMouseLeave={() => !isLocked && setHoveredColIndex(null)}
             style={{
               flex: colFlex,
-              gap: `${gap}px`,
+              ...(isMobile ? {} : { gap: `${gap}px` }),
               willChange: "flex",
             }}
             animate={{
               opacity: isLocked && !isColActive ? 0 : 1,
             }}
-            transition={{ 
-              layout: { 
-                duration: isLocked ? expandDuration : collapseDuration, 
-                ease: [0.22, 1, 0.36, 1] 
+            transition={{
+              layout: {
+                duration: isLocked ? expandDuration : collapseDuration,
+                ease: [0.22, 1, 0.36, 1]
               },
               opacity: { duration: 0.3, delay: isLocked ? 0.9 : 0 }
             }}
           >
-            {colItems.map((cell) => {
+            {isMobile ? (
+              <ScrollBlur showBlur={!isLocked} className="overflow-y-auto">
+                <div className="flex flex-col" style={{ gap: `${gap}px` }}>
+                  {colItems.map((cell) => {
               const rowMultiplier = cell.rowSpan || 1;
               const itemFlex = isLocked
                 ? (cell.id === activeId ? 100 : 0.001)
@@ -156,7 +169,7 @@ export const Tesseract = ({
                   style={cellStyle}
                   onMouseEnter={() => {
                     if (isLocked) return;
-                    
+
                     if (cell.disableHover) {
                         setHoveredColIndex(null);
                         setHoveredItemId(null);
@@ -169,6 +182,55 @@ export const Tesseract = ({
                 />
               );
             })}
+                </div>
+              </ScrollBlur>
+            ) : (
+              colItems.map((cell) => {
+              const rowMultiplier = cell.rowSpan || 1;
+              const itemFlex = isLocked
+                ? (cell.id === activeId ? 100 : 0.001)
+                : cell.disableHover
+                  ? rowMultiplier
+                  : (hoveredItemId === cell.id ? 2 : 1) * rowMultiplier;
+
+              const span = cell._actualColSpan || cell.colSpan || 1;
+              const cellStyle = span > 1
+                ? {
+                    flex: itemFlex,
+                    width: `calc(${(100 / columns) * span}% + ${(span - 1) * (gap / columns)}px)`,
+                    minWidth: `calc(${(100 / columns) * span}% + ${(span - 1) * (gap / columns)}px)`,
+                  }
+                : { flex: itemFlex };
+
+              return (
+                <TesseractCell
+                  key={cell.id}
+                  cell={cell}
+                  path={path}
+                  onNavigate={onNavigate}
+                  activeId={activeId}
+                  isLocked={isLocked}
+                  isHovered={hoveredItemId === cell.id}
+                  level={level}
+                  expandDuration={expandDuration}
+                  collapseDuration={collapseDuration}
+                  style={cellStyle}
+                  onMouseEnter={() => {
+                    if (isLocked) return;
+
+                    if (cell.disableHover) {
+                        setHoveredColIndex(null);
+                        setHoveredItemId(null);
+                    } else {
+                        setHoveredColIndex(colIndex);
+                        setHoveredItemId(cell.id);
+                    }
+                  }}
+                  onMouseLeave={() => !isLocked && setHoveredItemId(null)}
+                />
+              );
+            })
+            )}
           </motion.div>
         );
       })}
