@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useRef, useEffect } from "react";
-import { motion, AnimatePresence, PanInfo } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { TesseractCellData } from "@/types";
 import { Tesseract } from "./Tesseract";
@@ -59,16 +59,20 @@ export const TesseractCell = ({
   const isActive = cell.id === activeId;
   const canExpand = !cell.isLeaf && (cell.renderExpanded || (cell.children && cell.children.length > 0));
   const haptics = useHaptics();
-  const expandedRef = useRef<HTMLDivElement>(null);
+  const hasTriggeredHaptic = useRef(false);
 
-  // Trigger haptics on expand/collapse
+  // Trigger haptics on expand only (fixed infinite loop)
   useEffect(() => {
-    if (!isMobile) return;
-
-    if (isActive) {
-      haptics.expand();
+    if (!isMobile || !isActive) {
+      hasTriggeredHaptic.current = false;
+      return;
     }
-  }, [isActive, isMobile, haptics]);
+
+    if (!hasTriggeredHaptic.current) {
+      haptics.expand();
+      hasTriggeredHaptic.current = true;
+    }
+  }, [isActive, isMobile]);
 
   const handleClick = () => {
     if (isLocked || cell.isLeaf) return;
@@ -80,31 +84,9 @@ export const TesseractCell = ({
     }
   };
 
-  // Swipe-down gesture handler for mobile
-  const handlePanEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (!isMobile || !isActive) return;
-
-    // Swipe down threshold: 100px with velocity consideration
-    const swipeThreshold = 100;
-    const velocityThreshold = 500;
-
-    if (
-      info.offset.y > swipeThreshold ||
-      (info.offset.y > 50 && info.velocity.y > velocityThreshold)
-    ) {
-      haptics.collapse();
-      onNavigate(path.slice(0, -1));
-    }
-  };
-
   return (
     <motion.div
-      ref={expandedRef}
       layout
-      drag={isMobile && isActive ? "y" : false}
-      dragConstraints={{ top: 0, bottom: 0 }}
-      dragElastic={0.2}
-      onPanEnd={handlePanEnd}
       className={cn(
         "relative overflow-hidden bg-black border flex flex-col",
         // 1. Default State
@@ -117,16 +99,16 @@ export const TesseractCell = ({
         !isActive && !isLocked && canExpand && "cursor-pointer",
         // 5. Leaf nodes
         cell.isLeaf && "cursor-default",
-        // 6. Mobile: Snap scrolling
-        isMobile && !isActive && "snap-start",
-        // 7. Mobile: Active takes full viewport
-        isMobile && isActive && "fixed inset-0 z-50"
+        // 6. Mobile: Snap scrolling + horizontal margin
+        isMobile && !isActive && "snap-start mx-4",
+        // 7. Mobile: Active takes full viewport below breadcrumb
+        isMobile && isActive && "fixed left-0 right-0 bottom-0 z-40 top-16"
       )}
       style={{
         ...style,
         ...(isMobile && !isActive && {
-          minHeight: "auto",
-          height: "auto",
+          flex: "0 0 auto",
+          minHeight: "fit-content",
         }),
       }}
       animate={{

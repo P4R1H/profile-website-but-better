@@ -42,9 +42,6 @@ export const Tesseract = ({
   const expandDuration = config.expandDuration ?? 1.2;
   const collapseDuration = config.collapseDuration ?? 0.8;
 
-  // Mobile-specific configuration
-  const mobileHorizontalPadding = config.mobile?.horizontalPadding ?? 16;
-
   // OPTIMIZATION 1: Memoize column distribution
   const distributedColumns = useMemo(() => {
     const dist: ProcessedCell[][] = Array.from({ length: columns }, () => []);
@@ -105,16 +102,12 @@ export const Tesseract = ({
   return (
     <div
       className={cn(
-        "flex w-full h-full overflow-hidden",
-        isMobile && "flex-col",
+        "flex w-full h-full",
+        isMobile ? "flex-col" : "overflow-hidden",
         className
       )}
       style={{
         gap: `${gap}px`,
-        ...(isMobile && {
-          paddingLeft: `${mobileHorizontalPadding}px`,
-          paddingRight: `${mobileHorizontalPadding}px`,
-        })
       }}
     >
       {distributedColumns.map((colItems, colIndex) => {
@@ -128,14 +121,14 @@ export const Tesseract = ({
             key={colIndex}
             layout
             className={cn(
-              "flex flex-col overflow-hidden",
-              isMobile ? "w-full" : "h-full"
+              "flex flex-col",
+              isMobile ? "w-full" : "h-full overflow-hidden"
             )}
             onMouseLeave={() => !isMobile && !isLocked && setHoveredColIndex(null)}
             style={{
-              flex: colFlex,
+              flex: isMobile ? "0 0 auto" : colFlex,
               gap: `${gap}px`,
-              willChange: "flex",
+              ...(isMobile ? {} : { willChange: "flex" }),
             }}
             animate={{
               opacity: isLocked && !isColActive ? 0 : 1,
@@ -155,15 +148,20 @@ export const Tesseract = ({
                 : cell.disableHover
                   ? rowMultiplier
                   : (hoveredItemId === cell.id ? 2 : 1) * rowMultiplier;
-              
+
               const span = cell._actualColSpan || cell.colSpan || 1;
-              const cellStyle = span > 1
-                ? {
-                    flex: itemFlex,
-                    width: `calc(${(100 / columns) * span}% + ${(span - 1) * (gap / columns)}px)`,
-                    minWidth: `calc(${(100 / columns) * span}% + ${(span - 1) * (gap / columns)}px)`,
-                  }
-                : { flex: itemFlex };
+              const isThisCellActive = cell.id === activeId;
+
+              // On mobile, don't use flex for natural height (unless active)
+              const cellStyle = isMobile && !isThisCellActive
+                ? {} // Let cell take natural height
+                : span > 1
+                  ? {
+                      flex: itemFlex,
+                      width: `calc(${(100 / columns) * span}% + ${(span - 1) * (gap / columns)}px)`,
+                      minWidth: `calc(${(100 / columns) * span}% + ${(span - 1) * (gap / columns)}px)`,
+                    }
+                  : { flex: itemFlex };
               
               return (
                 <TesseractCell
