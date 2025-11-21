@@ -13,9 +13,9 @@ type ProcessedCell = TesseractCellData & {
 
 interface TesseractProps {
   items: TesseractCellData[];
-  path: string[]; 
+  path: string[];
   onNavigate: (newPath: string[]) => void;
-  level?: number; 
+  level?: number;
   className?: string;
   config?: TesseractConfig;
 }
@@ -59,13 +59,13 @@ export const Tesseract = ({
           }
         }
 
-        const itemWithSpan: ProcessedCell = { 
-          ...item, 
-          _spanStart: bestStartCol, 
-          _actualColSpan: itemColSpan 
+        const itemWithSpan: ProcessedCell = {
+          ...item,
+          _spanStart: bestStartCol,
+          _actualColSpan: itemColSpan
         };
         dist[bestStartCol].push(itemWithSpan);
-        
+
         for (let i = 0; i < itemColSpan; i++) {
           columnHeights[bestStartCol + i] = minSpanHeight + itemRowSpan;
         }
@@ -80,13 +80,13 @@ export const Tesseract = ({
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
 
   // Expansion state
-  const activeId = path[0]; 
+  const activeId = path[0];
   const isLocked = !!activeId;
 
   // OPTIMIZATION 2: Pre-compute which column contains the active item
   const activeColumnIndex = useMemo(() => {
     if (!activeId) return -1;
-    return distributedColumns.findIndex(col => 
+    return distributedColumns.findIndex(col =>
       col.some(item => item.id === activeId)
     );
   }, [activeId, distributedColumns]);
@@ -105,7 +105,7 @@ export const Tesseract = ({
   const isMobile = columns === 1;
 
   return (
-    <div 
+    <div
       className={cn("flex w-full h-full relative", isMobile ? "overflow-hidden" : "overflow-hidden", className)}
       style={{ gap: `${gap}px` }}
     >
@@ -119,7 +119,7 @@ export const Tesseract = ({
 
       {distributedColumns.map((colItems, colIndex) => {
         const isColActive = colIndex === activeColumnIndex;
-        const colFlex = isLocked 
+        const colFlex = isLocked
           ? (isColActive ? 100 : 0.001)
           : (hoveredColIndex === colIndex ? 2 : 1);
 
@@ -131,8 +131,8 @@ export const Tesseract = ({
             className={cn(
               "flex flex-col",
               // Mobile: Allow scrolling, hide scrollbar. Desktop: Hidden overflow
-              isMobile 
-                ? (isLocked ? "h-full overflow-hidden" : "h-full overflow-y-auto no-scrollbar pb-20 pt-4")
+              isMobile
+                ? (isLocked ? "h-full overflow-hidden" : "h-full overflow-y-auto no-scrollbar pb-20 pt-1")
                 : "h-full overflow-hidden"
             )}
             onMouseLeave={() => !isLocked && setHoveredColIndex(null)}
@@ -144,10 +144,10 @@ export const Tesseract = ({
             animate={{
               opacity: isLocked && !isColActive ? 0 : 1,
             }}
-            transition={{ 
-              layout: { 
-                duration: isLocked ? expandDuration : collapseDuration, 
-                ease: [0.22, 1, 0.36, 1] 
+            transition={{
+              layout: {
+                duration: isLocked ? expandDuration : collapseDuration,
+                ease: [0.22, 1, 0.36, 1]
               },
               opacity: { duration: 0.3, delay: isLocked ? 0.9 : 0 }
             }}
@@ -156,13 +156,13 @@ export const Tesseract = ({
               const rowMultiplier = cell.rowSpan || 1;
               // On mobile, we don't want flex expansion for hover, just fixed height or auto
               // But to keep animations consistent, we can keep flex logic but adjust values
-              
+
               const itemFlex = isLocked
                 ? (cell.id === activeId ? 100 : 0.001)
                 : cell.disableHover
                   ? rowMultiplier
                   : (hoveredItemId === cell.id && !isMobile ? 2 : 1) * rowMultiplier;
-              
+
               // On mobile, items should have a minimum height to be visible
               const mobileHeight = isLocked && cell.id === activeId ? "100%" : "auto";
               const mobileMinHeight = isLocked ? (cell.id === activeId ? "100%" : "0px") : "180px";
@@ -170,16 +170,16 @@ export const Tesseract = ({
               const span = cell._actualColSpan || cell.colSpan || 1;
               const cellStyle = span > 1 && !isMobile
                 ? {
-                    flex: itemFlex,
-                    width: `calc(${(100 / columns) * span}% + ${(span - 1) * (gap / columns)}px)`,
-                    minWidth: `calc(${(100 / columns) * span}% + ${(span - 1) * (gap / columns)}px)`,
-                  }
-                : { 
-                    flex: isMobile ? "none" : itemFlex,
-                    height: isMobile ? mobileHeight : "auto",
-                    minHeight: isMobile ? mobileMinHeight : "auto"
-                  };
-              
+                  flex: itemFlex,
+                  width: `calc(${(100 / columns) * span}% + ${(span - 1) * (gap / columns)}px)`,
+                  minWidth: `calc(${(100 / columns) * span}% + ${(span - 1) * (gap / columns)}px)`,
+                }
+                : {
+                  flex: isMobile ? "none" : itemFlex,
+                  height: isMobile ? mobileHeight : "auto",
+                  minHeight: isMobile ? mobileMinHeight : "auto"
+                };
+
               return (
                 <TesseractCell
                   key={cell.id}
@@ -195,13 +195,13 @@ export const Tesseract = ({
                   style={cellStyle}
                   onMouseEnter={() => {
                     if (isLocked || isMobile) return; // Disable hover on mobile
-                    
+
                     if (cell.disableHover) {
-                        setHoveredColIndex(null);
-                        setHoveredItemId(null);
+                      setHoveredColIndex(null);
+                      setHoveredItemId(null);
                     } else {
-                        setHoveredColIndex(colIndex);
-                        setHoveredItemId(cell.id);
+                      setHoveredColIndex(colIndex);
+                      setHoveredItemId(cell.id);
                     }
                   }}
                   onMouseLeave={() => !isLocked && !isMobile && setHoveredItemId(null)}
