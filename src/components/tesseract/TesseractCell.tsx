@@ -1,10 +1,11 @@
 "use client";
 
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { TesseractCellData } from "@/types";
 import { Tesseract } from "./Tesseract";
+import { useLongPress } from "@/lib/hooks";
 
 type CellContextType = {
   isHovered: boolean;
@@ -35,6 +36,11 @@ interface TesseractCellProps {
   style?: React.CSSProperties;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
+  // Mobile props
+  setHoveredItemId?: (id: string | null) => void;
+  setHoveredColIndex?: (index: number | null) => void;
+  colIndex?: number;
+  isMobile?: boolean;
 }
 
 export const TesseractCell = ({
@@ -50,14 +56,47 @@ export const TesseractCell = ({
   style,
   onMouseEnter,
   onMouseLeave,
+  setHoveredItemId,
+  setHoveredColIndex,
+  colIndex,
+  isMobile,
 }: TesseractCellProps) => {
   const isActive = cell.id === activeId;
   const canExpand = !cell.isLeaf && (cell.renderExpanded || (cell.children && cell.children.length > 0));
+  const isLongPressTriggered = useRef(false);
 
-  const handleClick = () => {
+  const handleLongPress = () => {
+    if (isLocked || cell.disableHover || !isMobile) return;
+    if (navigator.vibrate) navigator.vibrate(15);
+    setHoveredItemId?.(cell.id);
+    setHoveredColIndex?.(colIndex ?? 0);
+    isLongPressTriggered.current = true;
+  };
+
+  const handlePressRelease = () => {
+    if (isMobile && isLongPressTriggered.current) {
+        setHoveredItemId?.(null);
+        setHoveredColIndex?.(null);
+    }
+  };
+
+  const { onTouchStart, onTouchEnd } = useLongPress(handleLongPress, {
+    threshold: 300,
+    onStart: () => { isLongPressTriggered.current = false; },
+    onFinish: handlePressRelease,
+    onCancel: handlePressRelease
+  });
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (isMobile && isLongPressTriggered.current) {
+        e.stopPropagation();
+        return;
+    }
+
     if (isLocked || cell.isLeaf) return;
     
     if (canExpand) {
+      if (navigator.vibrate && isMobile) navigator.vibrate(5);
       onNavigate([cell.id]); 
     } else {
       console.log("Leaf clicked:", cell.title);
@@ -91,6 +130,8 @@ export const TesseractCell = ({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onClick={handleClick}
+      onTouchStart={isMobile ? onTouchStart : undefined}
+      onTouchEnd={isMobile ? onTouchEnd : undefined}
     >
       
       {/* Collapsed View Content */}
@@ -105,7 +146,10 @@ export const TesseractCell = ({
           <motion.div layout="position" className="flex flex-col gap-2 min-w-[200px] pointer-events-auto">
             <motion.h3 
               layout="position"
-              className="text-zinc-100 font-bold uppercase tracking-tight text-lg"
+              className={cn(
+                "text-zinc-100 font-bold uppercase tracking-tight",
+                isMobile ? "text-2xl" : "text-lg"
+              )}
             >
               {cell.title}
             </motion.h3>
@@ -113,7 +157,10 @@ export const TesseractCell = ({
             {cell.subtitle && (
               <motion.p 
                 layout="position"
-                className="text-zinc-500 font-mono text-xs uppercase"
+                className={cn(
+                    "text-zinc-500 font-mono uppercase",
+                    isMobile ? "text-sm" : "text-xs"
+                )}
               >
                 {cell.subtitle}
               </motion.p>
@@ -171,6 +218,7 @@ export const TesseractCell = ({
                   config={{
                     expandDuration,
                     collapseDuration,
+                    columns: isMobile ? 1 : 3, // Pass down mobile column count
                   }}
                 />
               )}
