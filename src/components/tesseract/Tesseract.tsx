@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { TesseractCellData, TesseractConfig } from "@/types";
 import { TesseractCell } from "./TesseractCell";
+import { useMobileDetection } from "@/hooks/useMobileDetection";
 
 type ProcessedCell = TesseractCellData & {
   _spanStart?: number;
@@ -28,11 +29,21 @@ export const Tesseract = ({
   className,
   config = {},
 }: TesseractProps) => {
-  // Extract configuration with defaults
-  const columns = config.columns ?? 3;
-  const gap = config.gap ?? 8;
+  // Mobile detection
+  const { isMobile } = useMobileDetection();
+
+  // Extract configuration with mobile-aware defaults
+  const columns = isMobile
+    ? (config.mobile?.columns ?? 1)
+    : (config.columns ?? 3);
+  const gap = isMobile
+    ? (config.mobile?.gap ?? 12)
+    : (config.gap ?? 8);
   const expandDuration = config.expandDuration ?? 1.2;
   const collapseDuration = config.collapseDuration ?? 0.8;
+
+  // Mobile-specific configuration
+  const mobileHorizontalPadding = config.mobile?.horizontalPadding ?? 16;
 
   // OPTIMIZATION 1: Memoize column distribution
   const distributedColumns = useMemo(() => {
@@ -92,9 +103,19 @@ export const Tesseract = ({
   }, [activeId, distributedColumns]);
 
   return (
-    <div 
-      className={cn("flex w-full h-full overflow-hidden", className)}
-      style={{ gap: `${gap}px` }}
+    <div
+      className={cn(
+        "flex w-full h-full overflow-hidden",
+        isMobile && "flex-col",
+        className
+      )}
+      style={{
+        gap: `${gap}px`,
+        ...(isMobile && {
+          paddingLeft: `${mobileHorizontalPadding}px`,
+          paddingRight: `${mobileHorizontalPadding}px`,
+        })
+      }}
     >
       {distributedColumns.map((colItems, colIndex) => {
         const isColActive = colIndex === activeColumnIndex;
@@ -106,8 +127,11 @@ export const Tesseract = ({
           <motion.div
             key={colIndex}
             layout
-            className="flex flex-col h-full overflow-hidden"
-            onMouseLeave={() => !isLocked && setHoveredColIndex(null)}
+            className={cn(
+              "flex flex-col overflow-hidden",
+              isMobile ? "w-full" : "h-full"
+            )}
+            onMouseLeave={() => !isMobile && !isLocked && setHoveredColIndex(null)}
             style={{
               flex: colFlex,
               gap: `${gap}px`,
@@ -149,14 +173,15 @@ export const Tesseract = ({
                   onNavigate={onNavigate}
                   activeId={activeId}
                   isLocked={isLocked}
-                  isHovered={hoveredItemId === cell.id}
+                  isHovered={!isMobile && hoveredItemId === cell.id}
+                  isMobile={isMobile}
                   level={level}
                   expandDuration={expandDuration}
                   collapseDuration={collapseDuration}
                   style={cellStyle}
                   onMouseEnter={() => {
-                    if (isLocked) return;
-                    
+                    if (isMobile || isLocked) return;
+
                     if (cell.disableHover) {
                         setHoveredColIndex(null);
                         setHoveredItemId(null);
@@ -165,7 +190,7 @@ export const Tesseract = ({
                         setHoveredItemId(cell.id);
                     }
                   }}
-                  onMouseLeave={() => !isLocked && setHoveredItemId(null)}
+                  onMouseLeave={() => !isMobile && !isLocked && setHoveredItemId(null)}
                 />
               );
             })}

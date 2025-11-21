@@ -1,21 +1,24 @@
 "use client";
 
-import React, { createContext, useContext } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { createContext, useContext, useRef, useEffect } from "react";
+import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { TesseractCellData } from "@/types";
 import { Tesseract } from "./Tesseract";
+import { useHaptics } from "@/hooks/useHaptics";
 
 type CellContextType = {
   isHovered: boolean;
   isLocked: boolean;
   isActive: boolean;
+  isMobile: boolean;
 };
 
 const CellContext = createContext<CellContextType>({
   isHovered: false,
   isLocked: false,
   isActive: false,
+  isMobile: false,
 });
 
 // --- 2. HOOK EXPORT ---
@@ -29,6 +32,7 @@ interface TesseractCellProps {
   activeId: string | undefined;
   isLocked: boolean;
   isHovered: boolean;
+  isMobile: boolean;
   level: number;
   expandDuration: number;
   collapseDuration: number;
@@ -44,6 +48,7 @@ export const TesseractCell = ({
   activeId,
   isLocked,
   isHovered,
+  isMobile,
   level,
   expandDuration,
   collapseDuration,
@@ -53,40 +58,83 @@ export const TesseractCell = ({
 }: TesseractCellProps) => {
   const isActive = cell.id === activeId;
   const canExpand = !cell.isLeaf && (cell.renderExpanded || (cell.children && cell.children.length > 0));
+  const haptics = useHaptics();
+  const expandedRef = useRef<HTMLDivElement>(null);
+
+  // Trigger haptics on expand/collapse
+  useEffect(() => {
+    if (!isMobile) return;
+
+    if (isActive) {
+      haptics.expand();
+    }
+  }, [isActive, isMobile, haptics]);
 
   const handleClick = () => {
     if (isLocked || cell.isLeaf) return;
-    
+
     if (canExpand) {
-      onNavigate([cell.id]); 
+      onNavigate([cell.id]);
     } else {
       console.log("Leaf clicked:", cell.title);
     }
   };
 
+  // Swipe-down gesture handler for mobile
+  const handlePanEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    if (!isMobile || !isActive) return;
+
+    // Swipe down threshold: 100px with velocity consideration
+    const swipeThreshold = 100;
+    const velocityThreshold = 500;
+
+    if (
+      info.offset.y > swipeThreshold ||
+      (info.offset.y > 50 && info.velocity.y > velocityThreshold)
+    ) {
+      haptics.collapse();
+      onNavigate(path.slice(0, -1));
+    }
+  };
+
   return (
     <motion.div
+      ref={expandedRef}
       layout
+      drag={isMobile && isActive ? "y" : false}
+      dragConstraints={{ top: 0, bottom: 0 }}
+      dragElastic={0.2}
+      onPanEnd={handlePanEnd}
       className={cn(
         "relative overflow-hidden bg-black border flex flex-col",
         // 1. Default State
         "border-zinc-900",
-        // 2. Hover State
-        !isActive && !isLocked && isHovered && !cell.disableHover && "border-zinc-700",
+        // 2. Hover State (Desktop only)
+        !isMobile && !isActive && !isLocked && isHovered && !cell.disableHover && "border-zinc-700",
         // 3. Active State
         isActive && "border-transparent cursor-default",
         // 4. Cursor Logic
         !isActive && !isLocked && canExpand && "cursor-pointer",
         // 5. Leaf nodes
-        cell.isLeaf && "cursor-default"
+        cell.isLeaf && "cursor-default",
+        // 6. Mobile: Snap scrolling
+        isMobile && !isActive && "snap-start",
+        // 7. Mobile: Active takes full viewport
+        isMobile && isActive && "fixed inset-0 z-50"
       )}
-      style={style}
+      style={{
+        ...style,
+        ...(isMobile && !isActive && {
+          minHeight: "auto",
+          height: "auto",
+        }),
+      }}
       animate={{
         opacity: isLocked && !isActive ? 0 : 1,
       }}
-      transition={{ 
+      transition={{
         layout: { duration: isLocked ? expandDuration : collapseDuration, ease: [0.22, 1, 0.36, 1] },
-        opacity: { duration: 0.3, delay: isLocked ? 0.9 : 0 }
+        opacity: { duration: 0.3, delay: isLocked ? 0.2 : 0 }
       }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
@@ -101,8 +149,11 @@ export const TesseractCell = ({
         transition={{ opacity: { duration: 0.8 } }}
       >
         {/* PROVIDER WRAPPER: Synchronizes state with all children */}
-        <CellContext.Provider value={{ isHovered, isLocked, isActive }}>
-          <motion.div layout="position" className="flex flex-col gap-2 min-w-[200px] pointer-events-auto">
+        <CellContext.Provider value={{ isHovered, isLocked, isActive, isMobile }}>
+          <motion.div layout="position" className={cn(
+            "flex flex-col gap-2 pointer-events-auto",
+            isMobile ? "min-w-0" : "min-w-[200px]"
+          )}>
             <motion.h3 
               layout="position"
               className="text-zinc-100 font-bold uppercase tracking-tight text-lg"
@@ -179,8 +230,8 @@ export const TesseractCell = ({
         )}
       </AnimatePresence>
 
-      {/* Hover Gradient */}
-      {!cell.disableHover && (
+      {/* Hover Gradient (Desktop only) */}
+      {!isMobile && !cell.disableHover && (
         <div
           className={cn(
             "absolute inset-0 bg-linear-to-br from-zinc-800/20 to-transparent opacity-0 transition-opacity duration-300 pointer-events-none",

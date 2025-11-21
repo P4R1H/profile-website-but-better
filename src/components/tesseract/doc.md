@@ -10,7 +10,8 @@
 6. [Feature Examples](#feature-examples)
 7. [Advanced Patterns](#advanced-patterns)
 8. [Animation System](#animation-system)
-9. [Best Practices](#best-practices)
+9. [Mobile Implementation](#mobile-implementation)
+10. [Best Practices](#best-practices)
 
 -----
 
@@ -27,6 +28,7 @@ Tesseract is a recursive, animated grid system designed for complex hierarchical
 * **State-Driven Navigation:** Path-based routing compatible with deep linking.
 * **Performance:** Optimized rendering with Framer Motion layout projection.
 * **Smooth Animations:** Zero jitter on all expansion types including custom components.
+* **Mobile-Native:** Fully responsive with touch gestures, haptics, and snap scrolling.
 
 -----
 
@@ -370,6 +372,102 @@ This prevents jitter during collapse by:
 1. Preserving layout during animation
 2. Adding subtle scale transitions
 3. Coordinating with parent flex transitions
+
+-----
+
+## Mobile Implementation
+
+Tesseract now features a **fully native mobile experience** with the same beautiful animations as desktop.
+
+### Key Mobile Features
+
+- 🎯 Single-column layout optimized for touch
+- 📱 Touch gestures (tap to expand, swipe-down to close)
+- 🎆 Haptic feedback on interactions
+- 📜 Snap scrolling with blur gradients
+- ✨ 100% animation preservation
+- 🔄 Full feature parity with desktop
+
+### Quick Mobile Setup
+
+```typescript
+import { Tesseract } from "@/components/tesseract/Tesseract";
+import { MobileScrollContainer } from "@/components/tesseract/MobileScrollContainer";
+import { useMobileDetection } from "@/hooks/useMobileDetection";
+
+export default function Page() {
+  const { isMobile } = useMobileDetection();
+  const [path, setPath] = useState<string[]>([]);
+
+  return (
+    <div className="h-[calc(100vh-8rem)] md:h-[700px]">
+      {isMobile ? (
+        <MobileScrollContainer>
+          <Tesseract
+            items={items}
+            path={path}
+            onNavigate={setPath}
+            config={{
+              mobile: {
+                columns: 1,
+                gap: 12,
+                enableHaptics: true,
+                snapScroll: true,
+                blurEdges: true,
+                horizontalPadding: 16,
+              }
+            }}
+          />
+        </MobileScrollContainer>
+      ) : (
+        <Tesseract items={items} path={path} onNavigate={setPath} />
+      )}
+    </div>
+  );
+}
+```
+
+### Mobile Configuration
+
+```typescript
+config={{
+  mobile: {
+    columns?: number;              // Default: 1
+    gap?: number;                  // Default: 12
+    enableHaptics?: boolean;       // Default: true
+    snapScroll?: boolean;          // Default: true
+    blurEdges?: boolean;           // Default: true
+    horizontalPadding?: number;    // Default: 16
+  }
+}}
+```
+
+### Mobile Utilities
+
+**Hooks:**
+- `useMobileDetection()` - Detect mobile viewport and touch capability
+- `useHaptics()` - Trigger haptic feedback patterns
+
+**Components:**
+- `MobileScrollContainer` - Snap scrolling with blur edges
+
+**Enhanced `useCellState()` hook:**
+```typescript
+const { isHovered, isLocked, isActive, isMobile } = useCellState();
+// Now includes isMobile flag!
+```
+
+### Comprehensive Documentation
+
+For complete mobile implementation details, see **[mobile-guide.md](./mobile-guide.md)** which includes:
+- Architecture and component structure
+- Touch gesture handling
+- Haptic feedback patterns
+- Performance optimizations
+- Mobile-specific best practices
+- Troubleshooting guide
+- Migration guide
+- API reference
 
 -----
 

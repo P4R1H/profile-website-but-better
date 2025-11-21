@@ -28,4 +28,14 @@ export interface TesseractConfig {
   gap?: number; // Gap between items in pixels (default: 8)
   expandDuration?: number; // Expansion animation duration in seconds (default: 1.2)
   collapseDuration?: number; // Collapse animation duration in seconds (default: 0.8)
+
+  // Mobile-specific configuration
+  mobile?: {
+    columns?: number; // Columns on mobile (default: 1)
+    gap?: number; // Gap on mobile in pixels (default: 12)
+    enableHaptics?: boolean; // Enable haptic feedback (default: true)
+    snapScroll?: boolean; // Enable snap scrolling (default: true)
+    blurEdges?: boolean; // Show blur on scroll edges (default: true)
+    horizontalPadding?: number; // Horizontal padding on mobile in pixels (default: 16)
+  };
 }
