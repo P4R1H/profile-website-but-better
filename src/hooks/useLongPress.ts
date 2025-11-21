@@ -11,6 +11,8 @@ export interface LongPressOptions {
   onPressStart?: () => void;
   /** Called when press ends (release) */
   onPressEnd?: () => void;
+  /** Called on tap (short press) */
+  onTap?: () => void;
 }
 
 export interface LongPressHandlers {
@@ -18,6 +20,7 @@ export interface LongPressHandlers {
   onMouseUp: (e: React.MouseEvent) => void;
   onMouseLeave: (e: React.MouseEvent) => void;
   onTouchStart: (e: React.TouchEvent) => void;
+  onTouchMove: (e: React.TouchEvent) => void;
   onTouchEnd: (e: React.TouchEvent) => void;
   onTouchCancel: (e: React.TouchEvent) => void;
 }
@@ -42,34 +45,47 @@ export const useLongPress = ({
   onLongPress,
   onPressStart,
   onPressEnd,
+  onTap,
 }: LongPressOptions): LongPressHandlers => {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const isLongPressRef = useRef(false);
+  const touchStartPos = useRef<{ x: number; y: number } | null>(null);
+  const hasMoved = useRef(false);
 
   const startPress = useCallback(() => {
     isLongPressRef.current = false;
+    hasMoved.current = false;
     onPressStart?.();
 
     // Set timer for long press
     timerRef.current = setTimeout(() => {
-      isLongPressRef.current = true;
-      onLongPress?.();
+      if (!hasMoved.current) {
+        isLongPressRef.current = true;
+        onLongPress?.();
+      }
     }, threshold);
   }, [threshold, onLongPress, onPressStart]);
 
-  const endPress = useCallback(() => {
+  const endPress = useCallback((wasTap: boolean = false) => {
     // Clear timer if still running
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
 
+    // If it was a tap (short press, no movement), trigger onTap
+    if (wasTap && !isLongPressRef.current && !hasMoved.current) {
+      onTap?.();
+    }
+
     // Call onPressEnd regardless of whether it was a long press
     onPressEnd?.();
 
-    // Reset flag
+    // Reset flags
     isLongPressRef.current = false;
-  }, [onPressEnd]);
+    hasMoved.current = false;
+    touchStartPos.current = null;
+  }, [onPressEnd, onTap]);
 
   const cancelPress = useCallback(() => {
     // Clear timer and reset without calling onPressEnd
@@ -78,6 +94,8 @@ export const useLongPress = ({
       timerRef.current = null;
     }
     isLongPressRef.current = false;
+    hasMoved.current = false;
+    touchStartPos.current = null;
   }, []);
 
   // Mouse handlers (for desktop testing)
@@ -85,7 +103,6 @@ export const useLongPress = ({
     (e: React.MouseEvent) => {
       // Only respond to left click
       if (e.button === 0) {
-        e.preventDefault();
         startPress();
       }
     },
@@ -94,7 +111,6 @@ export const useLongPress = ({
 
   const onMouseUp = useCallback(
     (e: React.MouseEvent) => {
-      e.preventDefault();
       endPress();
     },
     [endPress]
@@ -109,18 +125,37 @@ export const useLongPress = ({
   );
 
   // Touch handlers (for mobile)
+  // CRITICAL: Do NOT preventDefault to allow scrolling
   const onTouchStart = useCallback(
     (e: React.TouchEvent) => {
-      // Don't prevent default to allow scrolling if not held
+      const touch = e.touches[0];
+      touchStartPos.current = { x: touch.clientX, y: touch.clientY };
       startPress();
     },
     [startPress]
   );
 
+  const onTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      // If user moves their finger significantly, it's a scroll, not a tap
+      if (touchStartPos.current) {
+        const touch = e.touches[0];
+        const deltaX = Math.abs(touch.clientX - touchStartPos.current.x);
+        const deltaY = Math.abs(touch.clientY - touchStartPos.current.y);
+
+        // Movement threshold: 10px
+        if (deltaX > 10 || deltaY > 10) {
+          hasMoved.current = true;
+          cancelPress(); // Cancel long press if user is scrolling
+        }
+      }
+    },
+    [cancelPress]
+  );
+
   const onTouchEnd = useCallback(
     (e: React.TouchEvent) => {
-      e.preventDefault();
-      endPress();
+      endPress(true); // true = this was a potential tap
     },
     [endPress]
   );
@@ -138,6 +173,7 @@ export const useLongPress = ({
     onMouseUp,
     onMouseLeave,
     onTouchStart,
+    onTouchMove,
     onTouchEnd,
     onTouchCancel,
   };

@@ -89,17 +89,25 @@ export const TesseractCell = ({
         onLongPressEnd?.();
       }
     },
+    onTap: () => {
+      // On mobile tap, trigger the expand action
+      if (isMobile) {
+        handleClick();
+      }
+    },
   });
 
   // Combine handlers for mobile and desktop
   const combinedHandlers = isMobile
     ? {
-        // Mobile: Use long press handlers
-        ...longPressHandlers,
-        onClick: handleClick,
+        // Mobile: Touch handlers for long press and tap
+        onTouchStart: longPressHandlers.onTouchStart,
+        onTouchMove: longPressHandlers.onTouchMove,
+        onTouchEnd: longPressHandlers.onTouchEnd,
+        onTouchCancel: longPressHandlers.onTouchCancel,
       }
     : {
-        // Desktop: Use mouse handlers
+        // Desktop: Mouse handlers for hover + click
         onMouseEnter,
         onMouseLeave,
         onClick: handleClick,

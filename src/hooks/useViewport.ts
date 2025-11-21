@@ -18,14 +18,15 @@ export interface ViewportConfig {
  */
 export const useViewport = (): ViewportConfig => {
   const [config, setConfig] = useState<ViewportConfig>(() => {
-    // SSR-safe: Return mobile default during server render
+    // SSR-safe: Return desktop default during server render to match initial CSS
+    // This prevents hydration mismatch
     if (typeof window === "undefined") {
       return {
-        columns: 1,
-        gap: 16,
-        isMobile: true,
+        columns: 3,
+        gap: 8,
+        isMobile: false,
         isTablet: false,
-        isDesktop: false,
+        isDesktop: true,
       };
     }
 

@@ -43,7 +43,7 @@ export default function Home() {
 
   return (
     <ViewportProvider>
-      <main className="min-h-screen bg-black p-4 sm:p-8 flex flex-col items-center justify-center">
+      <main className="min-h-screen bg-black p-4 sm:p-8 flex flex-col items-center sm:justify-center">
         <div className="w-full max-w-7xl mb-4 h-8 flex items-center">
           <Breadcrumb
             path={path}
@@ -52,7 +52,7 @@ export default function Home() {
           />
         </div>
 
-        <div className="w-full max-w-7xl h-[calc(100dvh-6rem)] sm:h-[700px]">
+        <div className="w-full max-w-7xl min-h-[600px] sm:h-[700px]">
           <Tesseract
             items={rootItems}
             path={path}
