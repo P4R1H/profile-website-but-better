@@ -2,9 +2,10 @@
 
 import React, { createContext, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn, triggerHaptic } from "@/lib/utils";
 import { TesseractCellData } from "@/types";
 import { Tesseract } from "./Tesseract";
+import { useLongPress } from "@/hooks/useLongPress";
 
 type CellContextType = {
   isHovered: boolean;
@@ -32,9 +33,12 @@ interface TesseractCellProps {
   level: number;
   expandDuration: number;
   collapseDuration: number;
+  isMobile: boolean;
   style?: React.CSSProperties;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
+  onLongPressStart?: () => void;
+  onLongPressEnd?: () => void;
 }
 
 export const TesseractCell = ({
@@ -47,22 +51,59 @@ export const TesseractCell = ({
   level,
   expandDuration,
   collapseDuration,
+  isMobile,
   style,
   onMouseEnter,
   onMouseLeave,
+  onLongPressStart,
+  onLongPressEnd,
 }: TesseractCellProps) => {
   const isActive = cell.id === activeId;
   const canExpand = !cell.isLeaf && (cell.renderExpanded || (cell.children && cell.children.length > 0));
 
   const handleClick = () => {
     if (isLocked || cell.isLeaf) return;
-    
+
     if (canExpand) {
-      onNavigate([cell.id]); 
+      // Trigger haptic feedback on mobile
+      if (isMobile) {
+        triggerHaptic("medium");
+      }
+      onNavigate([cell.id]);
     } else {
       console.log("Leaf clicked:", cell.title);
     }
   };
+
+  // Long press handlers for mobile "hold to preview"
+  const longPressHandlers = useLongPress({
+    threshold: 500, // 500ms hold
+    onLongPress: () => {
+      if (isMobile && !isLocked && !cell.disableHover) {
+        triggerHaptic("light");
+        onLongPressStart?.();
+      }
+    },
+    onPressEnd: () => {
+      if (isMobile && !isLocked) {
+        onLongPressEnd?.();
+      }
+    },
+  });
+
+  // Combine handlers for mobile and desktop
+  const combinedHandlers = isMobile
+    ? {
+        // Mobile: Use long press handlers
+        ...longPressHandlers,
+        onClick: handleClick,
+      }
+    : {
+        // Desktop: Use mouse handlers
+        onMouseEnter,
+        onMouseLeave,
+        onClick: handleClick,
+      };
 
   return (
     <motion.div
@@ -80,17 +121,19 @@ export const TesseractCell = ({
         // 5. Leaf nodes
         cell.isLeaf && "cursor-default"
       )}
-      style={style}
+      style={{
+        ...style,
+        // Ensure minimum height on mobile to prevent squeezing
+        minHeight: isMobile && !isActive ? "120px" : undefined,
+      }}
       animate={{
         opacity: isLocked && !isActive ? 0 : 1,
       }}
-      transition={{ 
+      transition={{
         layout: { duration: isLocked ? expandDuration : collapseDuration, ease: [0.22, 1, 0.36, 1] },
         opacity: { duration: 0.3, delay: isLocked ? 0.9 : 0 }
       }}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      onClick={handleClick}
+      {...combinedHandlers}
     >
       
       {/* Collapsed View Content */}
@@ -163,14 +206,15 @@ export const TesseractCell = ({
                   })}
                 </motion.div>
               ) : (
-                <Tesseract 
+                <Tesseract
                   items={cell.children || []}
-                  path={path.slice(1)} 
+                  path={path.slice(1)}
                   onNavigate={(subPath) => onNavigate([cell.id, ...subPath])}
                   level={level + 1}
                   config={{
                     expandDuration,
                     collapseDuration,
+                    // No need to pass columns/gap - will inherit from viewport context
                   }}
                 />
               )}

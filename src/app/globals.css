@@ -7,6 +7,10 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Tesseract responsive columns - prevents flash on load */
+  --tesseract-columns: 1;
+  --tesseract-gap: 16px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -20,4 +24,19 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Tesseract responsive breakpoints */
+@media (min-width: 768px) {
+  :root {
+    --tesseract-columns: 2;
+    --tesseract-gap: 12px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --tesseract-columns: 3;
+    --tesseract-gap: 8px;
+  }
 }

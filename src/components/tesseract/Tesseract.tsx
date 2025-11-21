@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { TesseractCellData, TesseractConfig } from "@/types";
 import { TesseractCell } from "./TesseractCell";
+import { useViewportContext } from "@/contexts/ViewportContext";
 
 type ProcessedCell = TesseractCellData & {
   _spanStart?: number;
@@ -28,11 +29,14 @@ export const Tesseract = ({
   className,
   config = {},
 }: TesseractProps) => {
-  // Extract configuration with defaults
-  const columns = config.columns ?? 3;
-  const gap = config.gap ?? 8;
-  const expandDuration = config.expandDuration ?? 1.2;
-  const collapseDuration = config.collapseDuration ?? 0.8;
+  // Get viewport config from context (shared across tree)
+  const viewport = useViewportContext();
+
+  // Extract configuration with viewport-aware defaults
+  const columns = config.columns ?? viewport.columns;
+  const gap = config.gap ?? viewport.gap;
+  const expandDuration = config.expandDuration ?? (viewport.isMobile ? 0.8 : 1.2);
+  const collapseDuration = config.collapseDuration ?? (viewport.isMobile ? 0.6 : 0.8);
 
   // OPTIMIZATION 1: Memoize column distribution
   const distributedColumns = useMemo(() => {
@@ -98,9 +102,13 @@ export const Tesseract = ({
     >
       {distributedColumns.map((colItems, colIndex) => {
         const isColActive = colIndex === activeColumnIndex;
-        const colFlex = isLocked 
+
+        // Mobile-aware flex calculations
+        const colFlex = isLocked
           ? (isColActive ? 100 : 0.001)
-          : (hoveredColIndex === colIndex ? 2 : 1);
+          : viewport.isMobile
+            ? (hoveredColIndex === colIndex ? 1.5 : 1) // Less aggressive on mobile
+            : (hoveredColIndex === colIndex ? 2 : 1); // Desktop behavior
 
         return (
           <motion.div
@@ -153,10 +161,11 @@ export const Tesseract = ({
                   level={level}
                   expandDuration={expandDuration}
                   collapseDuration={collapseDuration}
+                  isMobile={viewport.isMobile}
                   style={cellStyle}
                   onMouseEnter={() => {
-                    if (isLocked) return;
-                    
+                    if (isLocked || viewport.isMobile) return; // Disable mouse hover on mobile
+
                     if (cell.disableHover) {
                         setHoveredColIndex(null);
                         setHoveredItemId(null);
@@ -165,7 +174,21 @@ export const Tesseract = ({
                         setHoveredItemId(cell.id);
                     }
                   }}
-                  onMouseLeave={() => !isLocked && setHoveredItemId(null)}
+                  onMouseLeave={() => !isLocked && !viewport.isMobile && setHoveredItemId(null)}
+                  onLongPressStart={() => {
+                    // Mobile: Long press triggers hover preview
+                    if (viewport.isMobile && !isLocked && !cell.disableHover) {
+                      setHoveredColIndex(colIndex);
+                      setHoveredItemId(cell.id);
+                    }
+                  }}
+                  onLongPressEnd={() => {
+                    // Mobile: Release long press removes hover preview
+                    if (viewport.isMobile && !isLocked) {
+                      setHoveredColIndex(null);
+                      setHoveredItemId(null);
+                    }
+                  }}
                 />
               );
             })}
