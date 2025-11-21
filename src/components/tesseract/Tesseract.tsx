@@ -101,8 +101,8 @@ export const Tesseract = ({
       {/* Mobile Scroll Gradients */}
       {isMobile && !isLocked && (
         <>
-          <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-black to-transparent z-20 pointer-events-none" />
-          <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-black to-transparent z-20 pointer-events-none" />
+          <div className="absolute top-0 left-0 right-0 h-12 bg-linear-to-b from-black to-transparent z-20 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 right-0 h-12 bg-linear-to-t from-black to-transparent z-20 pointer-events-none" />
         </>
       )}
 
@@ -119,7 +119,9 @@ export const Tesseract = ({
             className={cn(
               "flex flex-col",
               // Mobile: Allow scrolling, hide scrollbar. Desktop: Hidden overflow
-              isMobile ? "h-full overflow-y-auto no-scrollbar pb-20 pt-4" : "h-full overflow-hidden"
+              isMobile 
+                ? (isLocked ? "h-full overflow-hidden" : "h-full overflow-y-auto no-scrollbar pb-20 pt-4")
+                : "h-full overflow-hidden"
             )}
             onMouseLeave={() => !isLocked && setHoveredColIndex(null)}
             style={{
