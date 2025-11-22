@@ -80,7 +80,7 @@ export const TesseractCell = ({
     }
   };
 
-  const { onTouchStart, onTouchEnd } = useLongPress(handleLongPress, {
+  const { onTouchStart, onTouchEnd, onTouchMove } = useLongPress(handleLongPress, {
     threshold: 300,
     onStart: () => { isLongPressTriggered.current = false; },
     onFinish: handlePressRelease,
@@ -107,7 +107,7 @@ export const TesseractCell = ({
     <motion.div
       layout
       className={cn(
-        "relative overflow-hidden bg-black border flex flex-col",
+        "relative overflow-hidden bg-black border flex flex-col select-none",
         // 1. Default State
         "border-zinc-900",
         // 2. Hover State
@@ -132,6 +132,7 @@ export const TesseractCell = ({
       onClick={handleClick}
       onTouchStart={isMobile ? onTouchStart : undefined}
       onTouchEnd={isMobile ? onTouchEnd : undefined}
+      onTouchMove={isMobile ? onTouchMove : undefined}
     >
       
       {/* Collapsed View Content */}
@@ -143,30 +144,32 @@ export const TesseractCell = ({
       >
         {/* PROVIDER WRAPPER: Synchronizes state with all children */}
         <CellContext.Provider value={{ isHovered, isLocked, isActive }}>
-          <motion.div layout="position" className="flex flex-col gap-2 min-w-[200px] pointer-events-auto">
-            <motion.h3 
-              layout="position"
-              className={cn(
-                "text-zinc-100 font-bold uppercase tracking-tight",
-                isMobile ? "text-2xl" : "text-lg"
-              )}
-            >
-              {cell.title}
-            </motion.h3>
-            
-            {cell.subtitle && (
-              <motion.p 
+          <motion.div layout="position" className="flex flex-col gap-2 min-w-[200px] pointer-events-auto h-full">
+            <motion.div layout="position" className="shrink-0">
+              <motion.h3 
                 layout="position"
                 className={cn(
-                    "text-zinc-500 font-mono",
-                    isMobile ? "text-sm" : "text-xs"
+                  "text-zinc-100 font-bold uppercase tracking-tight",
+                  isMobile ? "text-2xl" : "text-lg"
                 )}
               >
-                {cell.subtitle}
-              </motion.p>
-            )}
+                {cell.title}
+              </motion.h3>
+              
+              {cell.subtitle && (
+                <motion.p 
+                  layout="position"
+                  className={cn(
+                      "text-zinc-500 font-mono",
+                      isMobile ? "text-sm" : "text-xs"
+                  )}
+                >
+                  {cell.subtitle}
+                </motion.p>
+              )}
+            </motion.div>
             
-            <motion.div layout="position">
+            <motion.div layout="position" className="grow min-h-0 relative">
                 {cell.content}
             </motion.div>
           </motion.div>
@@ -197,11 +200,9 @@ export const TesseractCell = ({
                   className="w-full h-full"
                   initial={{ scale: 0.95, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  exit={{ opacity: 0 }} 
                   transition={{
                     layout: { duration: collapseDuration, ease: [0.22, 1, 0.36, 1] },
                     scale: { duration: 0.4, ease: "easeOut" },
-                    opacity: { duration: 0.2 } 
                   }}
                 >
                   {cell.renderExpanded({

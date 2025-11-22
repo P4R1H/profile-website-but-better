@@ -33,13 +33,17 @@ export const Tesseract = ({
   const gap = config.gap ?? 8;
   const expandDuration = config.expandDuration ?? 1.2;
   const collapseDuration = config.collapseDuration ?? 0.8;
+  
+  const isMobile = columns === 1;
 
   // OPTIMIZATION 1: Memoize column distribution
   const distributedColumns = useMemo(() => {
     const dist: ProcessedCell[][] = Array.from({ length: columns }, () => []);
     const columnHeights = new Array(columns).fill(0);
 
-    items.forEach((item) => {
+    const visibleItems = items.filter(item => !isMobile || !item.hideOnMobile);
+
+    visibleItems.forEach((item) => {
       const itemColSpan = Math.min(item.colSpan ?? 1, columns);
       const itemRowSpan = item.rowSpan ?? 1;
 
@@ -79,6 +83,13 @@ export const Tesseract = ({
   const [hoveredColIndex, setHoveredColIndex] = useState<number | null>(null);
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
 
+  // Delayed expansion state to prevent layout jumps
+  const [expandedColIndex, setExpandedColIndex] = useState<number | null>(null);
+  const [expandedItemId, setExpandedItemId] = useState<string | null>(null);
+  
+  const itemTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const colTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // Expansion state
   const activeId = path[0];
   const isLocked = !!activeId;
@@ -102,8 +113,6 @@ export const Tesseract = ({
     }
   }, [isLocked, activeColumnIndex]);
 
-  const isMobile = columns === 1;
-
   return (
     <div
       className={cn("flex w-full h-full relative", isMobile ? "overflow-hidden" : "overflow-hidden", className)}
@@ -121,7 +130,7 @@ export const Tesseract = ({
         const isColActive = colIndex === activeColumnIndex;
         const colFlex = isLocked
           ? (isColActive ? 100 : 0.001)
-          : (hoveredColIndex === colIndex ? 2 : 1);
+          : (expandedColIndex === colIndex ? 2 : 1);
 
         return (
           <motion.div
@@ -135,7 +144,14 @@ export const Tesseract = ({
                 ? (isLocked ? "h-full overflow-hidden" : "h-full overflow-y-auto no-scrollbar pb-20 pt-1")
                 : "h-full overflow-hidden"
             )}
-            onMouseLeave={() => !isLocked && setHoveredColIndex(null)}
+            onMouseLeave={() => {
+              if (!isLocked) {
+                setHoveredColIndex(null);
+                colTimeoutRef.current = setTimeout(() => {
+                  setExpandedColIndex(null);
+                }, 10);
+              }
+            }}
             style={{
               flex: colFlex,
               gap: `${gap}px`,
@@ -161,11 +177,14 @@ export const Tesseract = ({
                 ? (cell.id === activeId ? 100 : 0.001)
                 : cell.disableHover
                   ? rowMultiplier
-                  : (hoveredItemId === cell.id && !isMobile ? 2 : 1) * rowMultiplier;
+                  : (expandedItemId === cell.id && !isMobile ? 2 : 1) * rowMultiplier;
 
               // On mobile, items should have a minimum height to be visible
               const mobileHeight = isLocked && cell.id === activeId ? "100%" : "auto";
-              const mobileMinHeight = isLocked ? (cell.id === activeId ? "100%" : "0px") : "180px";
+              const isCellHovered = hoveredItemId === cell.id;
+              const mobileMinHeight = isLocked 
+                ? (cell.id === activeId ? "100%" : "0px") 
+                : (isMobile && isCellHovered && !cell.disableHover ? "360px" : "180px");
 
               const span = cell._actualColSpan || cell.colSpan || 1;
               const cellStyle = span > 1 && !isMobile
@@ -196,15 +215,36 @@ export const Tesseract = ({
                   onMouseEnter={() => {
                     if (isLocked || isMobile) return; // Disable hover on mobile
 
+                    // Clear any pending timeouts
+                    if (itemTimeoutRef.current) {
+                      clearTimeout(itemTimeoutRef.current);
+                      itemTimeoutRef.current = null;
+                    }
+                    if (colTimeoutRef.current) {
+                      clearTimeout(colTimeoutRef.current);
+                      colTimeoutRef.current = null;
+                    }
+
                     if (cell.disableHover) {
                       setHoveredColIndex(null);
                       setHoveredItemId(null);
+                      setExpandedColIndex(null);
+                      setExpandedItemId(null);
                     } else {
                       setHoveredColIndex(colIndex);
                       setHoveredItemId(cell.id);
+                      setExpandedColIndex(colIndex);
+                      setExpandedItemId(cell.id);
                     }
                   }}
-                  onMouseLeave={() => !isLocked && !isMobile && setHoveredItemId(null)}
+                  onMouseLeave={() => {
+                    if (!isLocked && !isMobile) {
+                      setHoveredItemId(null);
+                      itemTimeoutRef.current = setTimeout(() => {
+                        setExpandedItemId(null);
+                      }, 10);
+                    }
+                  }}
                   // Pass handlers for mobile interaction
                   setHoveredItemId={setHoveredItemId}
                   setHoveredColIndex={setHoveredColIndex}

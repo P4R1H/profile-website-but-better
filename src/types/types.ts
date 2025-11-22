@@ -20,7 +20,8 @@ export interface TesseractCellData {
   
   // Leaf node configuration
   isLeaf?: boolean; 
-  disableHover?: boolean; 
+  disableHover?: boolean;
+  hideOnMobile?: boolean;
 }
 
 export interface TesseractConfig {

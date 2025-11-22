@@ -4,4 +4,5 @@ export const emptyData: TesseractCellData = {
   id: "empty",
   title: "",
   disableHover: true,
+  hideOnMobile: true,
 };
