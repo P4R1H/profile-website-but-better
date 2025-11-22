@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { TesseractCellData } from "@/types"; // Importing from your new types file
+import { TesseractCellData } from "@/types/types"; // Importing from your new types file
 
 interface BreadcrumbProps {
   path: string[];

@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { TesseractCellData, TesseractConfig } from "@/types";
+import { TesseractCellData, TesseractConfig } from "@/types/types";
 import { TesseractCell } from "./TesseractCell";
 
 type ProcessedCell = TesseractCellData & {

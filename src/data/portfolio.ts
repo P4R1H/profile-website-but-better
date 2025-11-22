@@ -1,4 +1,4 @@
-import { TesseractCellData } from '@/types';
+import { TesseractCellData } from '@/types/types';
 import { heroData } from './hero';
 import { connectData } from './connect';
 import { experienceData } from './experience';

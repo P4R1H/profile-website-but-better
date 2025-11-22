@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TesseractCellData } from '@/types';
+import { TesseractCellData } from '@/types/types';
 
 // --- Terminal Component ---
 export const TerminalUI = ({ onClose, cell }: { onClose: () => void; cell: TesseractCellData }) => {

@@ -1,4 +1,4 @@
-import { TesseractCellData } from '@/types';
+import { TesseractCellData } from '@/types/types';
 import React from 'react';
 
 export const connectData: TesseractCellData = {

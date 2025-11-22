@@ -1,4 +1,4 @@
-import { TesseractCellData } from '@/types';
+import { TesseractCellData } from '@/types/types';
 
 export const emptyData: TesseractCellData = {
   id: "empty",

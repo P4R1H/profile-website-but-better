@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { TesseractCellData } from "@/types";
+import { TesseractCellData } from "@/types/types";
 import { Tesseract } from "./Tesseract";
 import { useLongPress } from "@/lib/hooks";
 
