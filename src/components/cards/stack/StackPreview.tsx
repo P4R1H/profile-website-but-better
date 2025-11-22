@@ -1,11 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useCellState } from "@/components/tesseract/TesseractCell";
+import { useCellState } from "@/components/tesseract";
 import { allSkills, totalDomains } from "@/data/stack";
 
 export const StackPreview = () => {
-  const { isHovered, isLocked } = useCellState();
+  const { isHovered, isLocked } = useCellState("stack");
 
   return (
     <div className="w-full h-full relative pointer-events-none overflow-hidden">

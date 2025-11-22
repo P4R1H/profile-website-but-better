@@ -1,32 +1,73 @@
-import React from "react";
+// types/types.ts
 
+import { ReactNode } from "react";
+
+/**
+ * Configuration for the Tesseract grid
+ */
+export interface TesseractConfig {
+  columns?: number;           // Number of columns (default: 3)
+  gap?: number;              // Gap between items in pixels (default: 8)
+  expandDuration?: number;   // Expansion animation duration in seconds (default: 1.2)
+  collapseDuration?: number; // Collapse animation duration in seconds (default: 0.8)
+}
+
+/**
+ * Individual cell data for the Tesseract grid
+ */
 export interface TesseractCellData {
-  id: string;
-  title: string;
-  subtitle?: string;
-  content?: React.ReactNode;
-  children?: TesseractCellData[]; // Recursive definition
+  // Identity
+  id: string;                // Unique identifier for the cell
+  title: string;             // Primary display text
   
-  // Layout configuration
-  colSpan?: number; // Horizontal span (1-columns, default: 1)
-  rowSpan?: number; // Vertical span multiplier (default: 1)
-  themeColor?: string;
+  // Display Options
+  subtitle?: string;         // Secondary display text
+  content?: ReactNode;       // Content shown in collapsed state
   
-  // Custom expansion behavior
+  // Layout Control
+  rowSpan?: number;          // Vertical height multiplier (default: 1)
+  colSpan?: number;          // Horizontal width multiplier (default: 1)
+  hideOnMobile?: boolean;    // Hide this item on mobile layouts
+  
+  // Hierarchy
+  children?: TesseractCellData[]; // Nested grid items
+  
+  // Custom Expansion
   renderExpanded?: (props: {
     onClose: () => void;
     cell: TesseractCellData;
-  }) => React.ReactNode;
+  }) => ReactNode;           // Custom component for expanded state
   
-  // Leaf node configuration
-  isLeaf?: boolean; 
-  disableHover?: boolean;
-  hideOnMobile?: boolean;
+  // Behavior Flags
+  isLeaf?: boolean;          // Prevents expansion (terminal node)
+  disableHover?: boolean;    // Disables hover expansion effect
+  
+  // Styling
+  themeColor?: string;       // Optional theme color override
 }
 
-export interface TesseractConfig {
-  columns?: number; // Number of columns (default: 3)
-  gap?: number; // Gap between items in pixels (default: 8)
-  expandDuration?: number; // Expansion animation duration in seconds (default: 1.2)
-  collapseDuration?: number; // Collapse animation duration in seconds (default: 0.8)
+/**
+ * Unified interaction state for the Tesseract grid
+ */
+export interface TesseractState {
+  hoveredItemId: string | null;
+  hoveredColumnIndex: number | null;
+  expandedItemId: string | null;
+  expandedColumnIndex: number | null;
+}
+
+/**
+ * Column distribution result
+ */
+export interface ColumnDistribution {
+  distribution: Map<number, TesseractCellData[]>;
+  positions: Map<string, { column: number; span: number }>;
+}
+
+/**
+ * Props for expanded cell render function
+ */
+export interface ExpandedRenderProps {
+  onClose: () => void;
+  cell: TesseractCellData;
 }

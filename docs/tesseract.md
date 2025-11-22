@@ -1,486 +1,610 @@
-# Tesseract - Enhanced Technical Documentation
-
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Quick Start](#quick-start)
-3. [Core Concepts](#core-concepts)
-4. [Type Definitions](#type-definitions)
-5. [Configuration Options](#configuration-options)
-6. [Feature Examples](#feature-examples)
-7. [Advanced Patterns](#advanced-patterns)
-8. [Animation System](#animation-system)
-9. [Best Practices](#best-practices)
-
------
+# Tesseract Grid Component - Technical Documentation
 
 ## Overview
 
-Tesseract is a recursive, animated grid system designed for complex hierarchical data navigation. It utilizes a layout engine that distributes items into columns and handles fluid transitions between collapsed, hovered, and expanded states.
+Tesseract is a recursive, animated grid system designed for complex hierarchical data navigation. It features fluid push/pull animations, multi-dimensional spanning, and seamless transitions between collapsed, hovered, and expanded states.
 
-**Key Capabilities:**
+## Architecture
 
-* **Infinite Recursion:** Nested grids to arbitrary depths.
-* **Variable Dimensions:** Support for items spanning multiple rows AND columns.
-* **Configurable Layout:** Adjustable column count, gaps, and animation timings.
-* **Polymorphic Expansion:** Items can expand into nested grids or custom React components.
-* **State-Driven Navigation:** Path-based routing compatible with deep linking.
-* **Performance:** Optimized rendering with Framer Motion layout projection.
-* **Smooth Animations:** Zero jitter on all expansion types including custom components.
+### Core Principles
 
------
+1. **Immutable Data Flow**: No mutations of input data
+2. **Context-Driven State**: Centralized state management via React Context
+3. **Separation of Concerns**: Clear component boundaries and responsibilities
+4. **Performance by Design**: Efficient rendering without excessive memoization
 
-## Quick Start
+### Component Structure
 
-### Basic Implementation
+```
+TesseractProvider (Context)
+└── Tesseract (Grid Container)
+    └── Motion Column Wrappers
+        └── TesseractCell (Individual Cells)
+            ├── CollapsedContent
+            ├── ExpandedContent
+            │   └── Tesseract (Recursive) OR Custom Component
+            └── HoverOverlay
+```
+
+## API Reference
+
+### Tesseract Component
+
+The main grid container component.
 
 ```typescript
+interface TesseractProps {
+  items: TesseractCellData[];       // Array of cell data
+  path: string[];                    // Current navigation path
+  onNavigate: (path: string[]) => void; // Navigation callback
+  level?: number;                    // Recursion depth (internal)
+  className?: string;                // Additional CSS classes
+  config?: TesseractConfig;          // Grid configuration
+}
+```
+
+#### Usage Example
+
+```tsx
 import { Tesseract } from '@/components/tesseract';
-import { TesseractCellData } from '@/types';
 import { useState } from 'react';
 
-const items: TesseractCellData[] = [
-  { id: "about", title: "About Me", subtitle: "Learn More" },
-  { id: "projects", title: "Projects", subtitle: "View Portfolio" },
-  { id: "settings", title: "Settings", subtitle: "Configuration" },
-];
-
-export default function Page() {
+function App() {
   const [path, setPath] = useState<string[]>([]);
   
   return (
-    <div className="w-full h-[700px]">
+    <div className="h-screen">
       <Tesseract 
-        items={items}
+        items={gridItems}
         path={path}
         onNavigate={setPath}
-        config={{ columns: 3 }} // Optional configuration
+        config={{
+          columns: 3,
+          gap: 12,
+          expandDuration: 1.2,
+          collapseDuration: 0.8
+        }}
       />
     </div>
   );
 }
 ```
 
------
+### TesseractCellData Interface
 
-## Core Concepts
-
-### 1. Intelligent Column Distribution
-
-The grid automatically distributes items into N columns (configurable) using an intelligent algorithm that:
-- Balances column heights
-- Respects `colSpan` and `rowSpan` values
-- Optimally places multi-column items
-
-### 2. Path-Based Navigation
-
-Navigation is controlled by a string array representing the current hierarchy:
-
-* `[]`: Root level
-* `['projects']`: Inside "projects" node
-* `['projects', 'backend']`: Inside "backend" node within "projects"
-
-### 3. Expansion Logic
-
-Items exist in three states:
-
-1. **Idle:** Displays title, subtitle, and summary content.
-2. **Hover:** Expands vertically (2x flex-grow) to reveal more detail.
-3. **Active:** Expands to fill the parent container, rendering either `children` or `renderExpanded`.
-
-### 4. Two-Dimensional Spanning
-
-Items can now control their size in both dimensions:
-- **rowSpan:** Vertical height multiplier (e.g., `rowSpan: 2` = 2x taller)
-- **colSpan:** Horizontal width multiplier (e.g., `colSpan: 2` = spans 2 columns)
-
------
-
-## Type Definitions
-
-### TesseractCellData
+Defines the structure of each grid cell.
 
 ```typescript
 interface TesseractCellData {
-  // Identity
-  id: string;                // Unique identifier
-  title: string;             // Primary text
+  // Required
+  id: string;                        // Unique identifier
+  title: string;                     // Primary text
   
   // Display
-  subtitle?: string;         // Secondary text
-  content?: React.ReactNode; // Collapsed view content
+  subtitle?: string;                 // Secondary text
+  content?: ReactNode;               // Collapsed state content
   
-  // Layout (NEW: colSpan now functional!)
-  rowSpan?: number;          // Vertical height multiplier (Default: 1)
-  colSpan?: number;          // Horizontal width multiplier (Default: 1)
+  // Layout
+  rowSpan?: number;                  // Vertical multiplier (default: 1)
+  colSpan?: number;                  // Horizontal multiplier (default: 1)
+  hideOnMobile?: boolean;            // Hide on mobile layouts
   
-  // Recursion
-  children?: TesseractCellData[]; // Nested grid items
+  // Hierarchy
+  children?: TesseractCellData[];    // Nested grid items
   
   // Custom Expansion
-  renderExpanded?: (props: {
+  renderExpanded?: (props: {         // Custom expanded view
     onClose: () => void;
     cell: TesseractCellData;
-  }) => React.ReactNode;
+  }) => ReactNode;
   
-  // Configuration
-  isLeaf?: boolean;          // Disables click/expansion logic
-  disableHover?: boolean;    // Disables hover size expansion
+  // Behavior
+  isLeaf?: boolean;                  // Disable expansion
+  disableHover?: boolean;            // Disable hover effects
   
   // Styling
-  themeColor?: string;       // Optional theme override
+  themeColor?: string;               // Theme override
 }
 ```
 
-### TesseractConfig (NEW!)
+### TesseractConfig Interface
+
+Configuration options for the grid.
 
 ```typescript
 interface TesseractConfig {
-  columns?: number;           // Number of columns (default: 3)
-  gap?: number;              // Gap between items in pixels (default: 8)
-  expandDuration?: number;   // Expansion duration in seconds (default: 1.2)
-  collapseDuration?: number; // Collapse duration in seconds (default: 0.8)
+  columns?: number;           // Grid columns (default: 3)
+  gap?: number;              // Gap in pixels (default: 8)
+  expandDuration?: number;   // Expand animation (default: 1.2s)
+  collapseDuration?: number; // Collapse animation (default: 0.8s)
 }
 ```
 
------
+## Features
 
-## Configuration Options
+### 1. Multi-Dimensional Spanning
 
-### Column Count
-
-Adjust the number of columns to suit your layout:
+Items can span multiple rows and columns:
 
 ```typescript
-<Tesseract 
-  items={items}
-  path={path}
-  onNavigate={setPath}
-  config={{ columns: 4 }} // 4 columns instead of default 3
-/>
+const items: TesseractCellData[] = [
+  {
+    id: "hero",
+    title: "Hero Section",
+    rowSpan: 2,  // 2x height
+    colSpan: 2,  // 2x width
+    content: <HeroContent />
+  },
+  {
+    id: "sidebar",
+    title: "Sidebar",
+    rowSpan: 3,  // 3x height
+    content: <SidebarContent />
+  }
+];
 ```
 
-### Gap Sizing
+### 2. Recursive Nesting
 
-Control spacing between grid items:
+Create infinitely nested grid hierarchies:
 
 ```typescript
-config={{ gap: 16 }} // Larger gaps (default: 8px)
+const items: TesseractCellData[] = [
+  {
+    id: "projects",
+    title: "Projects",
+    children: [
+      {
+        id: "web",
+        title: "Web Apps",
+        children: [
+          { id: "react", title: "React Projects" },
+          { id: "vue", title: "Vue Projects" }
+        ]
+      },
+      {
+        id: "mobile",
+        title: "Mobile Apps"
+      }
+    ]
+  }
+];
 ```
 
-### Animation Timing
+### 3. Custom Expanded Views
 
-Fine-tune animation speeds:
+Render custom components in expanded state:
 
 ```typescript
-config={{
-  expandDuration: 1.5,    // Slower expansion (default: 1.2)
-  collapseDuration: 0.6,  // Faster collapse (default: 0.8)
-}}
+const items: TesseractCellData[] = [
+  {
+    id: "terminal",
+    title: "Terminal",
+    renderExpanded: ({ onClose }) => (
+      <TerminalEmulator 
+        onExit={onClose}
+        initialCommand="help"
+      />
+    )
+  }
+];
 ```
 
------
+### 4. State Hook Integration
 
-## Feature Examples
-
-### 1. Nested Grid (Recursion)
+Access cell state within content components:
 
 ```typescript
-{
-  id: "projects",
-  title: "Projects",
-  children: [
-    { id: "web", title: "Web Apps" },
-    { id: "mobile", title: "Mobile Apps" }
-  ]
-}
-```
+import { useCellState } from '@/components/tesseract';
 
-### 2. Multi-Row Item (rowSpan)
-
-```typescript
-{
-  id: "analytics",
-  title: "Weekly Analytics",
-  rowSpan: 2, // 2x vertical height
-  content: <GraphPreview />
-}
-```
-
-### 3. Multi-Column Item (colSpan)
-
-```typescript
-{
-  id: "dashboard",
-  title: "Wide Dashboard",
-  colSpan: 2, // Spans 2 columns horizontally
-  content: <DashboardPreview />
-}
-```
-
-### 4. Combined Spanning
-
-```typescript
-{
-  id: "hero",
-  title: "Hero Section",
-  rowSpan: 2,  // 2x taller
-  colSpan: 2,  // 2x wider
-  content: <HeroContent />
-}
-```
-
-### 5. Custom UI Expansion 
-
-```typescript
-{
-  id: "cli",
-  title: "Command Line",
-  renderExpanded: ({ onClose, cell }) => (
-    <TerminalComponent 
-      onExit={onClose} 
-      initialCommand="help" 
-    />
-  )
-}
-
-```
-Refer to native.md for guide to make performant components.
-
-### 6. Static/Leaf Nodes
-
-```typescript
-{
-  id: "status",
-  title: "System Status: Online",
-  isLeaf: true,
-  disableHover: true,
-  content: <StatusIndicator status="healthy" />
-}
-```
-
-### 7. Reactive Internal Content (Hooks)
-Use the useCellState hook to access the cell's hover/lock state. This eliminates "padding lag" and ensures your component animates exactly when the grid does.
-
-```
-import { useCellState } from '@/components/tesseract/TesseractCell';
-
-const SmartButton = () => {
-  const { isHovered } = useCellState(); // <--- Hook into parent state
-
+const InteractiveContent: React.FC<{ cellId: string }> = ({ cellId }) => {
+  const { isHovered, isActive, isExpanded } = useCellState(cellId);
+  
   return (
-    <div className={`transition-all duration-500 ${
-      isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-    }`}>
-      <button>View Details →</button>
+    <div className={`transition-all ${isHovered ? 'scale-105' : 'scale-100'}`}>
+      {isExpanded && <DetailedView />}
+      {!isExpanded && <SummaryView />}
     </div>
   );
 };
 
-// Usage in data
+// Usage in cell data
 {
-  id: "feature",
-  title: "Smart Feature",
-  content: <SmartButton />
+  id: "interactive",
+  title: "Interactive Cell",
+  content: <InteractiveContent cellId="interactive" />
 }
 ```
------
 
-## Advanced Patterns
+### 5. Mobile Optimization
 
-### Responsive Column Count
-
-Adjust columns based on viewport:
+Automatic mobile adaptations:
+- Long-press for hover preview
+- Single column layout
+- Touch-optimized interactions
+- Scroll indicators
 
 ```typescript
+// Responsive configuration
 const [columns, setColumns] = useState(3);
 
 useEffect(() => {
-  const handleResize = () => {
-    if (window.innerWidth < 768) setColumns(1);
-    else if (window.innerWidth < 1200) setColumns(2);
-    else setColumns(3);
+  const updateColumns = () => {
+    setColumns(window.innerWidth < 768 ? 1 : 3);
   };
   
-  handleResize();
-  window.addEventListener('resize', handleResize);
-  return () => window.removeEventListener('resize', handleResize);
+  updateColumns();
+  window.addEventListener('resize', updateColumns);
+  return () => window.removeEventListener('resize', updateColumns);
 }, []);
 
-return <Tesseract config={{ columns }} {...props} />;
+<Tesseract config={{ columns }} {...props} />
 ```
+
+## Animation System
+
+### Core Animation Principles
+
+The Tesseract uses a flex-based animation system:
+
+```
+Idle state:     flex: 1
+Hover state:    flex: 2
+Active state:   flex: 100
+Inactive:       flex: 0.001
+```
+
+### Animation Configuration
+
+```typescript
+const config: TesseractConfig = {
+  expandDuration: 1.5,    // Slower expansion
+  collapseDuration: 0.6,  // Faster collapse
+};
+```
+
+### Animation Coordination
+
+The component uses Framer Motion's layout animation system:
+
+```tsx
+<motion.div
+  layout
+  transition={{
+    layout: {
+      duration: expandDuration,
+      ease: [0.22, 1, 0.36, 1]  // Custom easing
+    }
+  }}
+>
+  {content}
+</motion.div>
+```
+
+## Context API
+
+### TesseractContext
+
+Access grid-wide state and configuration:
+
+```typescript
+import { useTesseractContext } from '@/components/tesseract';
+
+const Component = () => {
+  const { 
+    config,      // Grid configuration
+    state,       // Interaction state
+    isLocked,    // Is an item expanded?
+    activeId,    // Currently active item
+    isMobile     // Mobile detection
+  } = useTesseractContext();
+  
+  // Use context values
+};
+```
+
+### useCellState Hook
+
+Access individual cell state:
+
+```typescript
+import { useCellState } from '@/components/tesseract';
+
+const CellContent = ({ cellId }: { cellId: string }) => {
+  const {
+    isHovered,   // Is this cell hovered?
+    isLocked,    // Is grid locked?
+    isActive,    // Is this cell active?
+    isExpanded   // Is this cell expanded?
+  } = useCellState(cellId);
+  
+  // React to state changes
+};
+```
+
+## Advanced Patterns
 
 ### Dynamic Data Loading
 
 ```typescript
-const mapApiToGrid = (data: ApiResponse[]): TesseractCellData[] => {
-  return data.map(item => ({
-    id: item.uuid,
-    title: item.name,
-    colSpan: item.featured ? 2 : 1, // Featured items span 2 columns
-    rowSpan: item.priority === 'high' ? 2 : 1,
-    children: item.hasSubItems ? mapApiToGrid(item.subItems) : undefined
-  }));
-};
+const [items, setItems] = useState<TesseractCellData[]>([]);
+
+useEffect(() => {
+  async function loadData() {
+    const response = await fetch('/api/grid-data');
+    const data = await response.json();
+    
+    const gridItems = data.map(item => ({
+      id: item.uuid,
+      title: item.name,
+      subtitle: item.category,
+      colSpan: item.featured ? 2 : 1,
+      rowSpan: item.priority === 'high' ? 2 : 1,
+      children: item.children ? mapChildren(item.children) : undefined
+    }));
+    
+    setItems(gridItems);
+  }
+  
+  loadData();
+}, []);
 ```
 
-### Mixed Content Types
+### Theme Integration
 
-The grid handles mixed content gracefully:
-- Folders (nested grids)
-- Leaf nodes (static info)
-- Applications (custom expanded views)
-- Wide items (colSpan > 1)
-- Tall items (rowSpan > 1)
-
-All at the same hierarchy level!
-
------
-
-## Animation System
-
-The animation logic uses CSS Flexbox transitions via Framer Motion.
-
-### Flex-Grow Transition
-
-* Idle items: `flex: 1`
-* Hovered items: `flex: 2`
-* Active items: `flex: 100`
-* Siblings of active: `flex: 0.001`
-
-### Timing (Configurable!)
-
-* Expansion: `duration: 1.2s` (default), `ease: [0.22, 1, 0.36, 1]`
-* Collapse: `duration: 0.8s` (default)
-* Opacity: Delays applied to ensure layout stabilizes
-
-### Custom Component Handling
-
-Custom `renderExpanded` components are now wrapped in:
 ```typescript
-<motion.div
-  layout="preserve"
-  initial={{ scale: 0.95 }}
-  animate={{ scale: 1 }}
-  exit={{ scale: 0.95 }}
-/>
+const themedItems: TesseractCellData[] = items.map(item => ({
+  ...item,
+  themeColor: getThemeColor(item.category),
+  content: (
+    <div style={{ borderColor: item.themeColor }}>
+      {item.content}
+    </div>
+  )
+}));
 ```
 
-This prevents jitter during collapse by:
-1. Preserving layout during animation
-2. Adding subtle scale transitions
-3. Coordinating with parent flex transitions
+### Performance Optimization
 
------
+For large datasets (50+ items):
+
+```typescript
+// 1. Limit visible depth
+const MAX_DEPTH = 3;
+
+// 2. Lazy load children
+const lazyItem: TesseractCellData = {
+  id: "lazy",
+  title: "Load More",
+  renderExpanded: ({ onClose }) => {
+    const [children, setChildren] = useState<TesseractCellData[]>([]);
+    
+    useEffect(() => {
+      loadChildren().then(setChildren);
+    }, []);
+    
+    return children.length > 0 
+      ? <Tesseract items={children} />
+      : <Loading />;
+  }
+};
+
+// 3. Use windowing for very large lists
+import { VirtualGrid } from '@/components/virtual';
+
+const virtualizedGrid = (
+  <VirtualGrid
+    items={items}
+    renderItem={(item) => <TesseractCell {...item} />}
+  />
+);
+```
 
 ## Best Practices
 
-### 1. Container Sizing
-The parent of `<Tesseract />` must have a defined height.
+### 1. Container Requirements
 
-### 2. colSpan Guidelines
-- Use `colSpan` sparingly for featured/important items
-- Keep `colSpan` values reasonable (≤ total columns)
-- Consider responsive column counts with colSpan
+The parent container must have defined dimensions:
 
-### 3. Custom Expansion Layout
-When using `renderExpanded`:
-- Return components that use `w-full h-full`
-- Ensure `onClose` callback is wired up
-- Avoid complex animations that conflict with Tesseract's
+```tsx
+// Good
+<div className="h-screen">
+  <Tesseract {...props} />
+</div>
 
-### 4. Key Stability
-Ensure `id`s are unique at each tree level to prevent animation glitches.
+// Bad - No height defined
+<div>
+  <Tesseract {...props} />
+</div>
+```
 
-### 5. Performance
-- For grids with 50+ items, consider virtualization
-- Use `React.memo` on custom renderExpanded components
-- Keep rowSpan/colSpan values reasonable
+### 2. Unique IDs
 
------
-
-## Complete Implementation Example
+Ensure IDs are unique within each level:
 
 ```typescript
-"use client";
-
-import { Tesseract } from '@/components/tesseract';
-import { TesseractCellData } from '@/types';
-import { Breadcrumb } from '@/components/breadcrumb';
-import { useState } from 'react';
-
-const rootItems: TesseractCellData[] = [
-  { 
-    id: "hero", 
-    title: "Welcome", 
-    subtitle: "Start Here",
-    rowSpan: 2,
-    colSpan: 2,
-    content: <div className="text-lg">Featured content</div>
-  },
-  { 
-    id: "settings", 
-    title: "Settings", 
-    children: [
-      { id: "profile", title: "Profile" },
-      { id: "security", title: "Security" }
-    ] 
-  },
-  { 
-    id: "logs", 
-    title: "System Logs",
-    colSpan: 2, 
-    renderExpanded: ({ onClose }) => (
-      <div className="w-full h-full bg-zinc-900 p-4">
-        <button onClick={onClose}>Close</button>
-        <pre className="text-green-400">System initialized...</pre>
-      </div>
-    )
-  }
+// Good
+const items = [
+  { id: "home-1", title: "Home" },
+  { id: "about-1", title: "About" }
 ];
 
-export default function Interface() {
-  const [path, setPath] = useState<string[]>([]);
+// Bad - Duplicate IDs
+const items = [
+  { id: "item", title: "Item 1" },
+  { id: "item", title: "Item 2" }  // Duplicate ID!
+];
+```
 
+### 3. Responsive Design
+
+Always consider mobile layouts:
+
+```typescript
+const items: TesseractCellData[] = [
+  {
+    id: "desktop-only",
+    title: "Desktop Feature",
+    hideOnMobile: true,
+    colSpan: 3
+  },
+  {
+    id: "mobile-friendly",
+    title: "Works Everywhere",
+    colSpan: 1  // Works on mobile
+  }
+];
+```
+
+### 4. Animation Performance
+
+Keep animations smooth:
+
+```typescript
+// Good - Let Tesseract handle animations
+const content = <SimpleContent />;
+
+// Avoid - Conflicting animations
+const content = (
+  <motion.div animate={{ scale: [1, 2, 1] }}>
+    Complex animation that might conflict
+  </motion.div>
+);
+```
+
+### 5. Content Guidelines
+
+Design content for both states:
+
+```typescript
+const cellContent = (
+  <>
+    {/* Always visible */}
+    <h4>Summary</h4>
+    
+    {/* Show on hover/expand */}
+    <AnimatePresence>
+      {isHovered && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <DetailedInfo />
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </>
+);
+```
+
+## Troubleshooting
+
+### Issue: Animations are janky
+
+**Solution**: Check for conflicting CSS transitions or animations in child components.
+
+### Issue: Multi-column items don't display correctly
+
+**Solution**: Ensure `colSpan` values don't exceed the total column count.
+
+### Issue: Mobile interactions not working
+
+**Solution**: Verify the column count is set to 1 for mobile layouts.
+
+### Issue: Expansion doesn't work
+
+**Solution**: Check that items have either `children` or `renderExpanded` defined, and `isLeaf` is not set to `true`.
+
+### Issue: Performance degradation with many items
+
+**Solution**: Consider implementing virtualization or pagination for datasets over 100 items.
+
+## Complete Example
+
+```tsx
+"use client";
+
+import { useState, useEffect } from 'react';
+import { Tesseract, useCellState } from '@/components/tesseract';
+import type { TesseractCellData } from '@/components/tesseract';
+
+// Custom content component
+const DashboardWidget: React.FC<{ cellId: string }> = ({ cellId }) => {
+  const { isHovered } = useCellState(cellId);
+  
   return (
-    <main className="min-h-screen bg-black p-8 flex flex-col items-center justify-center">
-      <div className="w-full max-w-7xl mb-4 h-8">
-        <Breadcrumb 
-          path={path} 
-          rootItems={rootItems} 
-          onNavigate={setPath} 
-        />
-      </div>
-      
-      <div className="w-full max-w-7xl h-[700px]">
+    <div className={`p-4 transition-all ${isHovered ? 'bg-zinc-800' : 'bg-zinc-900'}`}>
+      <div className="text-2xl font-bold">42</div>
+      <div className="text-sm text-zinc-500">Active Users</div>
+    </div>
+  );
+};
+
+// Main component
+export default function Dashboard() {
+  const [path, setPath] = useState<string[]>([]);
+  const [columns, setColumns] = useState(3);
+  
+  // Responsive columns
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) setColumns(1);
+      else if (window.innerWidth < 1200) setColumns(2);
+      else setColumns(3);
+    };
+    
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  const items: TesseractCellData[] = [
+    {
+      id: "analytics",
+      title: "Analytics",
+      subtitle: "Real-time data",
+      rowSpan: 2,
+      colSpan: 2,
+      content: <DashboardWidget cellId="analytics" />,
+      children: [
+        { id: "users", title: "Users" },
+        { id: "revenue", title: "Revenue" }
+      ]
+    },
+    {
+      id: "notifications",
+      title: "Notifications",
+      subtitle: "3 new",
+      content: <NotificationList />
+    },
+    {
+      id: "settings",
+      title: "Settings",
+      renderExpanded: ({ onClose }) => (
+        <SettingsPanel onClose={onClose} />
+      )
+    }
+  ];
+  
+  return (
+    <main className="h-screen bg-black p-8">
+      <div className="max-w-7xl mx-auto h-full">
         <Tesseract 
-          items={rootItems} 
-          path={path} 
+          items={items}
+          path={path}
           onNavigate={setPath}
           config={{
-            columns: 3,           // Try 2, 4, or 5!
-            gap: 12,              // Larger gaps
-            expandDuration: 1.4,  // Slower expansion
-            collapseDuration: 0.7 // Faster collapse
+            columns,
+            gap: 12,
+            expandDuration: 1.2,
+            collapseDuration: 0.8
           }}
         />
       </div>
     </main>
   );
 }
-
 ```
 
-## Troubleshooting
-
-### Q: colSpan items don't look right?
-A: Ensure your column count supports the colSpan (e.g., colSpan: 3 in a 2-column grid won't work properly).
-
-### Q: Still seeing jitter on custom components?
-A: Ensure your custom component doesn't have conflicting animations or complex layout shifts. Use simple, flex-based layouts.
-
-### Q: Performance issues with many items?
-A: Consider reducing column count, using smaller gap values, or implementing virtualization for 100+ items.
-
-### Q: Animations too fast/slow?
-A: Adjust `expandDuration` and `collapseDuration` in the config object to your preference.
+This architecture provides a solid foundation for complex, animated grid interfaces while maintaining clean code structure and predictable behavior.
