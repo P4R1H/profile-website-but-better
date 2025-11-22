@@ -97,6 +97,7 @@ export const StackExpanded = ({ onClose }: StackExpandedProps) => {
                 <img
                   src={`https://skillicons.dev/icons?i=${skill}`}
                   alt={skill}
+                  loading="lazy"
                   className="w-14 h-14 md:w-16 md:h-16 object-contain block"
                 />
               </motion.div>

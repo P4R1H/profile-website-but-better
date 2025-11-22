@@ -10,6 +10,7 @@ export const stackSkills = {
 };
 
 export const allSkills = Object.values(stackSkills).flat();
+export const totalDomains = Object.keys(stackSkills).length;
 
 export const skillCategories: Record<string, { word1: string; word2: string }> = {
   // Languages
