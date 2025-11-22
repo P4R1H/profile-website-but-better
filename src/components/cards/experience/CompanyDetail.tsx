@@ -36,23 +36,22 @@ export const CompanyDetail = ({ data }: CompanyDetailProps) => {
   return (
     <div className="w-full h-full bg-black relative overflow-hidden">
        {/* Top Gradient */}
-       <div className="absolute top-0 left-0 right-0 h-12 bg-linear-to-b from-black via-black/80 to-transparent z-10 pointer-events-none" />
+       <div className="absolute top-0 left-0 right-0 h-8 md:h-12 bg-linear-to-b from-black via-black/80 to-transparent z-10 pointer-events-none" />
 
       <div 
         ref={scrollRef}
         onScroll={handleScroll}
         className="h-full overflow-y-auto scrollbar-hide"
       >
-        <div className="max-w-3xl mx-auto p-6 md:p-12 pt-24 pb-32">
+        <div className="max-w-3xl mx-auto px-2 md:px-12 pt-6 md:pt-16 pb-32">
             
             {/* Header Section (No line yet) */}
-            <div className="mb-10 pl-8">
+            <div className="mb-10 pl-3 md:pl-8">
                 <h1 className="text-4xl md:text-6xl font-bold text-zinc-100 tracking-tighter mb-2">
                     {data.company}
                 </h1>
-                <div className="flex items-center gap-3 font-mono text-xs md:text-sm text-zinc-500">
+                <div className="flex flex-col md:flex-row md:flex-wrap md:items-center gap-1 md:gap-3 font-mono text-xs md:text-sm text-zinc-500">
                     <span className="text-zinc-300">{data.role}</span>
-                    <span className="w-1 h-1 bg-zinc-700 rounded-full" />
                     <span>{data.period}</span>
                 </div>
             </div>
@@ -61,7 +60,7 @@ export const CompanyDetail = ({ data }: CompanyDetailProps) => {
             <div className="relative border-l border-zinc-800 ml-2 md:ml-4 space-y-12 pb-8">
                 
                 {/* Section 1: Description */}
-                <div className="relative pl-8 md:pl-12">
+                <div className="relative pl-3 md:pl-12">
                     {/* Node Dot */}
                     <div className="absolute -left-[5px] top-2 w-2.5 h-2.5 bg-zinc-950 border border-zinc-600 rounded-full" />
                     
@@ -71,7 +70,7 @@ export const CompanyDetail = ({ data }: CompanyDetailProps) => {
                 </div>
 
                 {/* Section 2: Stack */}
-                <div className="relative pl-8 md:pl-12">
+                <div className="relative pl-3 md:pl-12">
                     <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 bg-zinc-950 border border-zinc-600 rounded-full" />
                     
                     <h3 className="text-xs font-mono text-zinc-500 uppercase tracking-widest mb-4">Technologies</h3>
@@ -88,7 +87,7 @@ export const CompanyDetail = ({ data }: CompanyDetailProps) => {
                 </div>
 
                 {/* Section 3: Highlights */}
-                <div className="relative pl-8 md:pl-12">
+                <div className="relative pl-3 md:pl-12">
                     <div className="absolute -left-[5px] top-1.5 w-2.5 h-2.5 bg-zinc-950 border border-zinc-600 rounded-full" />
                     
                     <h3 className="text-xs font-mono text-zinc-500 uppercase tracking-widest mb-6">Key Outcomes</h3>

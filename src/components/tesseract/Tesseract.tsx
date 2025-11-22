@@ -260,7 +260,7 @@ export const Tesseract = ({
               )}
               style={{
                 flex: columnFlex,
-                gap: `${gridConfig.gap}px`,
+                gap: isLocked ? 0 : `${gridConfig.gap}px`,
               }}
               animate={{
                 opacity: isLocked && !isActiveColumn ? 0 : 1,

@@ -152,6 +152,7 @@ export const TesseractCell = ({
         "border-zinc-900",
         !isActive && !isLocked && isHovered && !cell.disableHover && "border-zinc-700",
         isActive && "border-transparent cursor-default",
+        isLocked && !isActive && "border-0",
         !isActive && !isLocked && canExpand && "cursor-pointer",
         cell.isLeaf && "cursor-default"
       )}
