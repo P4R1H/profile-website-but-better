@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState, useRef, useEffect } from "react";
 
 interface CompanyData {
   company: string;
@@ -17,126 +17,104 @@ interface CompanyDetailProps {
   onClose: () => void;
 }
 
-// Map tech names to skillicons IDs
-const techToSkillIcon = (tech: string): string | null => {
-  const mapping: Record<string, string | null> = {
-    "Go": "go",
-    "Java": "java",
-    "JavaScript": "js",
-    "AWS": "aws",
-    "Python": "py",
-    "NextJS": "nextjs",
-    "RabbitMQ": "rabbitmq",
-    "TensorFlow": "tensorflow",
-    "Keras": "keras",
-    "FastAPI": "fastapi",
-    "MongoDB": "mongodb",
-    "RedfishES": null, // No icon available
-    "ClickHouse": null, // No icon available
+export const CompanyDetail = ({ data }: CompanyDetailProps) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [showTopBlur, setShowTopBlur] = useState(false);
+  const [showBottomBlur, setShowBottomBlur] = useState(false);
+
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+    
+    // Show top blur only if scrolled down > 10px
+    setShowTopBlur(scrollTop > 10);
+    
+    // Show bottom blur only if there is content below (with 10px buffer)
+    setShowBottomBlur(scrollHeight - scrollTop - clientHeight > 10);
   };
 
-  return mapping[tech] ?? tech.toLowerCase();
-};
+  // Initial check (wait for render/paint)
+  useEffect(() => {
+    handleScroll();
+    window.addEventListener("resize", handleScroll);
+    return () => window.removeEventListener("resize", handleScroll);
+  }, [data]);
 
-export const CompanyDetail = ({ data }: CompanyDetailProps) => {
   return (
     <div className="w-full h-full relative bg-black overflow-hidden">
-      {/* No motion.div - parent TesseractCell already handles animations */}
-      <div className="w-full h-full overflow-y-auto scrollbar-hide">
-        {/* Centered container for desktop, full-width on mobile */}
-        <div className="w-full md:max-w-2xl md:mx-auto">
-          {/* Company Info Section */}
-          <div className="p-6">
-            <h2 className="text-3xl md:text-4xl font-bold text-zinc-100 uppercase tracking-tight leading-none">
-              {data.company}
-            </h2>
-            <p className="text-zinc-400 text-sm md:text-base font-mono mt-2">
-              {data.role}
-            </p>
-            <div className="flex items-center gap-3 mt-1 text-xs md:text-sm text-zinc-500 font-mono">
+      
+      {/* --- Top Gradient Blur (Conditional) --- */}
+      <div 
+        className={`absolute top-0 left-0 right-0 h-24 bg-linear-to-b from-black via-black/80 to-transparent z-10 pointer-events-none transition-opacity duration-300 ${showTopBlur ? 'opacity-100' : 'opacity-0'}`} 
+      />
+
+      {/* --- Scrollable Content --- */}
+      <div 
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="w-full h-full overflow-y-auto scrollbar-hide relative z-0"
+      >
+        <div className="max-w-3xl mx-auto p-6 md:p-12 pb-32">
+          
+          {/* Metadata Strip */}
+          <div className="flex flex-wrap items-center gap-4 mb-8 font-mono text-xs text-zinc-500">
+              <span className="text-zinc-300">{data.period}</span>
+              <span className="text-zinc-700">•</span>
               <span>{data.location}</span>
-              <span className="text-zinc-800">•</span>
-              <span>{data.period}</span>
-            </div>
+              <span className="text-zinc-700">•</span>
+              <span>{data.role}</span>
           </div>
 
-          {/* Divider */}
-          <div className="border-t border-zinc-800" />
+          {/* Title */}
+          <h1 className="text-4xl md:text-6xl font-bold text-zinc-100 tracking-tighter mb-8">
+              {data.company}
+          </h1>
 
-          {/* Description Section */}
-          <div className="p-6">
-            <p className="text-zinc-300 text-sm md:text-base leading-relaxed">
-              {data.description}
-            </p>
-          </div>
-
-          {/* Divider */}
-          <div className="border-t border-zinc-800" />
-
-          {/* Highlights Section */}
-          <div className="p-6">
-            <div className="space-y-4">
-              {data.highlights.map((highlight, index) => {
-                const [title, ...rest] = highlight.split(":");
-                const description = rest.join(":").trim();
-
-                return (
-                  <div key={index} className="text-sm md:text-base">
-                    <div className="text-zinc-500 font-mono text-xs uppercase tracking-wider mb-1">
-                      {title}
-                    </div>
-                    <div className="text-zinc-300">
-                      {description}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Divider */}
-          <div className="border-t border-zinc-800" />
-
-          {/* Tech Stack Section */}
-          <div className="p-6 pb-12">
-            <h3 className="text-zinc-500 text-xs font-mono uppercase tracking-wider mb-4">
-              Tech Stack
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {data.stack.map((tech) => {
-                const iconId = techToSkillIcon(tech);
-
-                // If no icon available, show text badge
-                if (!iconId) {
-                  return (
-                    <span
-                      key={tech}
-                      className="px-3 py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-mono"
-                    >
+          {/* Tech Stack - Text Only Tags */}
+          <div className="flex flex-wrap gap-2 mb-12">
+               {data.stack.map((tech) => (
+                   <span 
+                     key={tech} 
+                     className="px-2.5 py-1 border border-zinc-800 rounded-full text-zinc-400 text-[11px] font-mono hover:text-zinc-200 hover:border-zinc-600 transition-colors cursor-default"
+                   >
                       {tech}
-                    </span>
-                  );
-                }
+                   </span>
+               ))}
+          </div>
 
-                // Show skillicon
-                return (
-                  <div
-                    key={tech}
-                    className="w-12 h-12 md:w-14 md:h-14 bg-zinc-950 border border-zinc-800 flex items-center justify-center"
-                  >
-                    <img
-                      src={`https://skillicons.dev/icons?i=${iconId}`}
-                      alt={tech}
-                      loading="lazy"
-                      className="w-10 h-10 md:w-12 md:h-12 object-contain"
-                    />
-                  </div>
-                );
+          {/* Lead Paragraph / Description */}
+          <div className="prose prose-invert max-w-none mb-16">
+              <p className="text-xl md:text-2xl text-zinc-200 font-light leading-normal">
+                  {data.description}
+              </p>
+          </div>
+
+          {/* Highlights Grid */}
+          <div className="grid grid-cols-1 gap-8">
+              {data.highlights.map((highlight, index) => {
+                  const [title, ...rest] = highlight.split(":");
+                  const description = rest.join(":").trim();
+                  
+                  return (
+                      <div key={index} className="relative pl-6 border-l-2 border-zinc-800 hover:border-zinc-500 transition-colors duration-300">
+                          <h3 className="text-lg font-medium text-zinc-100 mb-2">
+                              {title}
+                          </h3>
+                          <p className="text-zinc-400 text-sm leading-relaxed">
+                              {description}
+                          </p>
+                      </div>
+                  );
               })}
-            </div>
           </div>
         </div>
       </div>
+
+      {/* --- Bottom Gradient Blur (Conditional) --- */}
+      <div 
+        className={`absolute bottom-0 left-0 right-0 h-24 bg-linear-to-t from-black via-black/80 to-transparent z-10 pointer-events-none transition-opacity duration-300 ${showBottomBlur ? 'opacity-100' : 'opacity-0'}`} 
+      />
+      
     </div>
   );
 };
