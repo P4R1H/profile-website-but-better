@@ -158,7 +158,7 @@ export const TesseractCell = ({
               <motion.p 
                 layout="position"
                 className={cn(
-                    "text-zinc-500 font-mono uppercase",
+                    "text-zinc-500 font-mono",
                     isMobile ? "text-sm" : "text-xs"
                 )}
               >

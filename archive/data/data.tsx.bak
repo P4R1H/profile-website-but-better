@@ -79,45 +79,42 @@ export const rootItems: TesseractCellData[] = [
     id: "exp", 
     title: "Experience", 
     subtitle: "My Journey", 
-    children: experienceItems 
-  },
-  { 
-    id: "projects", 
-    title: "Projects", 
-    subtitle: "What I've Built", 
-    children: projectItems 
+    children: experienceItems, 
+    rowSpan:2,
   },
   { 
     id: "stack", 
     title: "Stack", 
-    subtitle: "My Arsenal" 
+    subtitle: "My Arsenal", 
+    rowSpan: 1
   },
   { 
     id: "connect", 
     title: "Connect", 
     subtitle: "Reach Out" 
   },
-  { 
-    id: "blog", 
-    title: "Blog", 
-    subtitle: "Thoughts" 
-  },
-  {
-    id: "systemmonitor",
-    title: "SystemMonitor",
-    subtitle: "SystemMonitor",
-    renderExpanded: ({ onClose }) => <SystemMonitor onClose={onClose} />,
+    { 
+    id: "projects", 
+    title: "Projects", 
+    subtitle: "What I've Built", 
+    children: projectItems ,
+    rowSpan: 2
   },
   { 
-    id: "extra", 
-    title: "Extra", 
+    id: "Wins", 
+    title: "Wins", 
     subtitle: "More Stuff",
     isLeaf: true,
-    content: <div className="text-zinc-600 text-xs mt-2">This is a leaf node</div>
+    content: <div className="text-zinc-600 text-xs mt-2">This is a leaf node</div>,
   },
   { 
-    id: "extra2", 
-    title: "Misc", 
-    subtitle: "Details" 
+    id: "blog", 
+    title: "Thoughts", 
+    subtitle: "" 
   },
+  {
+    id: "h",
+    title: "",
+    disableHover: true
+  }
 ];

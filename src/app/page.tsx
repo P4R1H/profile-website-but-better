@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Tesseract } from "../components/tesseract/Tesseract";
 import { Breadcrumb } from "@/components/breadcrumb";
-import { rootItems } from "./data/data";
+import { rootItems } from "@/data/portfolio";
 import { useMediaQuery } from "@/lib/hooks";
 
 export default function Home() {
