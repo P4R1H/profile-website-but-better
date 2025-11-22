@@ -70,7 +70,7 @@ export function Portfolio({ initialIsDesktop }: PortfolioProps) {
 
   return (
     <main className="h-dvh w-full bg-black flex flex-col items-center justify-center overflow-hidden relative">
-      <div className="w-full max-w-7xl h-12 flex items-center px-4 md:px-8 shrink-0 z-50">
+      <div className="w-full max-w-6xl h-12 flex items-center px-4 md:px-8 shrink-0 z-50">
         <Breadcrumb
           path={path}
           rootItems={rootItems}
@@ -78,7 +78,7 @@ export function Portfolio({ initialIsDesktop }: PortfolioProps) {
         />
       </div>
 
-      <div className="w-full max-w-7xl flex-1 min-h-0 relative">
+      <div className="w-full max-w-6xl flex-1 min-h-0 max-h-[90%] relative">
         <Tesseract
           items={rootItems}
           path={path}
