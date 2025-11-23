@@ -1,0 +1,1 @@
+make itemHoverLeave also work cross cells, currently it only works from tesseract to outside tesseract
