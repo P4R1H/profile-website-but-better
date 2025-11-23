@@ -90,7 +90,6 @@ export function useLongPress(
   };
 }
 
-// --- MOBILE SCRUBBER HOOK (FIXED) ---
 
 interface UseMobileScrubberProps {
   enabled: boolean;

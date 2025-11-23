@@ -164,7 +164,7 @@ export const TesseractCell = ({
           <div className="relative w-full h-full overflow-hidden">
              <div 
                ref={progressRef}
-               className="absolute w-[3px] bg-zinc-200"
+               className="absolute w-[3px] bg-zinc-500"
                style={{ 
                  left: 0, 
                  height: '20%', 
