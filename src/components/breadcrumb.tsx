@@ -48,6 +48,20 @@ export const Breadcrumb = ({
         ~root
       </button>
 
+      {/* WIP Notice - Remove when site is complete */}
+      <span className="text-zinc-600 text-xs ml-3 font-mono">
+        work in progress, please visit{" "}
+        <a 
+          href="https://terminal.parthg.tech" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-zinc-400 hover:text-white underline transition-colors"
+        >
+          terminal.parthg.tech
+        </a>
+        {" "}for previous one
+      </span>
+
       {/* Path Segments */}
       {breadcrumbItems.map((crumb, index) => {
         const isLast = index === path.length - 1;
