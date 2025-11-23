@@ -6,7 +6,7 @@ export const stackSkills = {
   languages: ["cpp", "c", "java", "py", "go", "ts", "js", "kotlin"],
   frameworks: ["html", "css", "react", "nextjs", "vite", "nodejs", "fastapi", "tensorflow"],
   tools: ["git", "githubactions", "docker", "vscode", "bash", "linux", "postman", "raspberrypi"],
-  databases: ["mongodb", "mysql", "redis", "aws", "gcp", "cloudflare", "androidstudio"],
+  databases: ["mongodb", "mysql", "redis", "aws", "gcp", "cloudflare", "hetzner", "androidstudio"],
 };
 
 export const allSkills = Object.values(stackSkills).flat();
@@ -51,6 +51,7 @@ export const skillCategories: Record<string, { word1: string; word2: string }> =
   gcp: { word1: "GCP", word2: "Cloud" },
   cloudflare: { word1: "Cloudflare", word2: "Edge" },
   androidstudio: { word1: "Android Studio", word2: "Mobile" },
+  hetzner : {word1: "Hetzner", word2: "Cloud"}
 };
 
 export const stackCell: TesseractCellData = {
@@ -60,3 +61,27 @@ export const stackCell: TesseractCellData = {
   content: <StackPreview />,
   renderExpanded: ({ onClose }) => <StackExpanded onClose={onClose} />,
 };
+
+/*
+Missing:
+Frameworks 
+keras
+expressjs
+discordpy
+reactnative
+
+Databases
+postgresql
+clickhouse
+
+Cloud
+hetzner
+
+Tools
+jenkins
+cicd
+restapi
+agile
+scrum
+github
+*/

@@ -8,6 +8,31 @@ interface StackExpandedProps {
   onClose: () => void;
 }
 
+const localIcons = ["hetzner"];
+
+const SkillIcon = ({ skill }: { skill: string }) => {
+  const [src, setSrc] = useState(() => {
+    if (localIcons.includes(skill)) {
+      return `/skillicons/${skill}.svg`;
+    }
+    return `https://skillicons.dev/icons?i=${skill}`;
+  });
+
+  return (
+    <img
+      src={src}
+      alt={skill}
+      loading="lazy"
+      className="w-14 h-14 md:w-16 md:h-16 object-contain block"
+      onError={() => {
+        if (src.startsWith("https://skillicons.dev")) {
+          setSrc(`/skillicons/${skill}.svg`);
+        }
+      }}
+    />
+  );
+};
+
 export const StackExpanded = ({ onClose }: StackExpandedProps) => {
   const [hoveredSkill, setHoveredSkill] = useState<string | null>(null);
 
@@ -94,12 +119,7 @@ export const StackExpanded = ({ onClose }: StackExpandedProps) => {
                 onMouseLeave={() => setHoveredSkill(null)}
                 className="w-20 h-20 md:w-24 md:h-24 bg-zinc-950 border border-zinc-800 flex items-center justify-center hover:border-zinc-600 hover:bg-zinc-900 hover:scale-110 transition-all cursor-pointer"
               >
-                <img
-                  src={`https://skillicons.dev/icons?i=${skill}`}
-                  alt={skill}
-                  loading="lazy"
-                  className="w-14 h-14 md:w-16 md:h-16 object-contain block"
-                />
+                <SkillIcon skill={skill} />
               </motion.div>
             ))}
           </div>
