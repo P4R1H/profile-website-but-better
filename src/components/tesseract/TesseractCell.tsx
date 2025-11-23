@@ -20,6 +20,7 @@ interface TesseractCellProps {
   onHoverLeave: () => void;
   onMobileLongPress: (itemId: string, columnIndex: number) => void;
   onMobileRelease: () => void;
+  onMobileClick: (itemId: string, columnIndex: number) => void;
 }
 
 export const TesseractCell = ({
@@ -34,6 +35,7 @@ export const TesseractCell = ({
   onHoverLeave,
   onMobileLongPress,
   onMobileRelease,
+  onMobileClick,
 }: TesseractCellProps) => {
   const { config, isLocked, activeId, isMobile, state } = useTesseractContext();
   
@@ -45,15 +47,27 @@ export const TesseractCell = ({
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);    
   const progressRef = useRef<HTMLDivElement | null>(null); 
+  const isLongPressTriggered = useRef(false);
+  const wasLongPress = useRef(false);
 
   // --- INTERACTION ---
 
   // 1. Standard Long Press (No Children / Desktop)
   const handleStandardLongPressStart = useCallback(() => {
     if (isLocked || cell.disableHover || !isMobile) return;
+    isLongPressTriggered.current = true;
+    wasLongPress.current = true;
     if (navigator.vibrate) navigator.vibrate(15);
     onMobileLongPress(cell.id, columnIndex);
   }, [isLocked, cell.disableHover, cell.id, isMobile, columnIndex, onMobileLongPress]);
+
+  const handleTouchFinish = useCallback(() => {
+    if (isLongPressTriggered.current) {
+      onMobileRelease();
+      isLongPressTriggered.current = false;
+      setTimeout(() => { wasLongPress.current = false; }, 100);
+    }
+  }, [onMobileRelease]);
 
   const {
     onTouchStart: onStandardStart,
@@ -61,8 +75,8 @@ export const TesseractCell = ({
     onTouchMove: onStandardMove
   } = useLongPress(handleStandardLongPressStart, {
     threshold: 300,
-    onFinish: onMobileRelease,
-    onCancel: onMobileRelease
+    onFinish: handleTouchFinish,
+    onCancel: handleTouchFinish
   });
 
   // 2. Mobile Scrubber (Children + Mobile)
@@ -113,10 +127,19 @@ export const TesseractCell = ({
   }, [calculateCellFlex, isMobile, isLocked, isActive, isHovered, cell.disableHover, isMultiColumn, columnSpan, config.columns, config.gap]);
 
   const handleClick = useCallback((e: React.MouseEvent) => {
-    if (isLocked || cell.isLeaf || !canExpand) return;
+    if (isLocked) return;
+
+    // Case 3: Mobile + No Children + No RenderExpanded
+    if (isMobile && !cell.renderExpanded && (!cell.children || cell.children.length === 0)) {
+      if (wasLongPress.current) return;
+      onMobileClick(cell.id, columnIndex);
+      return;
+    }
+
+    if (cell.isLeaf || !canExpand) return;
     if (navigator.vibrate && isMobile) navigator.vibrate(5);
     onNavigate([cell.id]);
-  }, [isMobile, isLocked, cell.isLeaf, cell.id, canExpand, onNavigate]);
+  }, [isMobile, isLocked, cell.isLeaf, cell.id, canExpand, onNavigate, onMobileClick, columnIndex, cell.renderExpanded, cell.children]);
 
   const layoutTransition = {
     duration: isLocked ? config.expandDuration : config.collapseDuration,

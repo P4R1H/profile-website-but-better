@@ -181,6 +181,28 @@ export const Tesseract = ({
     });
   }, [isMobile, isLocked]);
 
+  // Handle mobile click (toggle)
+  const handleMobileClick = useCallback((itemId: string, columnIndex: number) => {
+    if (!isMobile || isLocked) return;
+    
+    setInteractionState(prev => {
+      if (prev.expandedItemId === itemId) {
+        return {
+          hoveredItemId: null,
+          hoveredColumnIndex: null,
+          expandedItemId: null,
+          expandedColumnIndex: null,
+        };
+      }
+      return {
+        hoveredItemId: itemId,
+        hoveredColumnIndex: columnIndex,
+        expandedItemId: itemId,
+        expandedColumnIndex: columnIndex,
+      };
+    });
+  }, [isMobile, isLocked]);
+
   // Handle mobile release
   const handleMobileRelease = useCallback(() => {
     if (!isMobile) return;
@@ -294,6 +316,7 @@ export const Tesseract = ({
                     onHoverLeave={handleItemHoverLeave}
                     onMobileLongPress={handleMobileLongPress}
                     onMobileRelease={handleMobileRelease}
+                    onMobileClick={handleMobileClick}
                   />
                 );
               })}
