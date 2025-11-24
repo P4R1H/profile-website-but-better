@@ -133,3 +133,33 @@ We use a spring-based physics model for a "heavy" but responsive feel.
 *   **Collapse:** `duration: 0.8s` - Slightly faster to return to the grid.
 *   **Opacity:** `duration: 0.3s` - Content fades in/out with a slight delay to prevent visual clutter during the morph.
 
+This architecture provides a solid foundation for complex, animated grid interfaces while maintaining clean code structure and predictable behavior.
+
+## Cell Designs
+
+This section walks through the different cell types used across the site, with a concise description of each cell's visual/interaction design and the "X factor" — the distinctive trait that makes the cell special.
+
+- **Wins (Achievements)**: Timeline-style expanded view with node dots or stars, chronological grouping, and animated reveal per item. Uses featured variants and stat snippets for highlighted entries. X factor: storytelling-focused timeline that highlights milestones and credibility quickly and visually.
+
+- **Projects (ProjectList / ProjectDetail)**: Compact project entries with category chips, year, short description, and optional link CTA. Filterable categories and animated list transitions make exploration smooth. X factor: a scannable, filterable archive that balances thoroughness with quick discovery.
+
+- **Stack (StackExpanded / StackPreview)**: A dense grid of skill icons with hover states and a dynamic floating sentence that updates based on the hovered skill. Icon fallback logic ensures robust loading. X factor: highly visual skill expression — quick perception of breadth via iconography and contextual micro-copy.
+
+- **Thoughts (ThoughtsPreview / ThoughtsExpanded / ThoughtCard / ThoughtDetail)**: Feed-centric center column flanked by left/right sidebars for nav and widgets, supporting pinned items, search, tag filters, and deep-dive overlays. X factor: hybrid social + longform experience that supports both skim and deep reading with strong discovery tools.
+
+- **Connect (ConnectPreview)**: Minimal, unobtrusive preview that reveals external links (LinkedIn, GitHub) and email on hover. X factor: low-friction contact surface that surfaces actions only when relevant, keeping the grid visually calm.
+
+- **Experience (CompanyDetail / ExperienceExpanded)**: (Preview/Expanded placeholders present) Intended as a career timeline with company-level detail cards and timeline nodes. X factor: narrative career progression and detail-first company context. Note: some files are placeholders — implement or refine per design needs.
+
+- **Hero (hero cell)**: (Folder currently empty) Expected to be a high-impact focal cell containing large typographic treatment, subtitle, and primary CTA or visual. X factor: immediate orientation — sets the tone and hierarchy for the grid.
+
+- **Live (live cell)**: (Folder currently empty) Intended for live/status widgets or ephemeral content previews. X factor: real-time signal surface for status or streaming content within a stable grid cell.
+
+- **Blank / Shared / Generic Templates**: Generic minimal templates used as shells for custom content or experiments. They rely on `content` and `renderExpanded` to implement the final experience. X factor: maximum flexibility — easy to repurpose without touching core layout logic.
+
+### Interaction & Design Notes
+
+- **Mobile interactions**: Long-press provides a hover-like preview on mobile for simple cells; a scrubber enables rapid navigation through child items for nested cells.
+- **Spanning & placement**: Use `rowSpan` and `colSpan` to create visual hierarchy; the distribution algorithm tries to minimize gaps for multi-column items.
+- **Opt-out flags**: Cells can set `disableHover` to remove hover affordances or `isLeaf` to prevent expansion.
+
