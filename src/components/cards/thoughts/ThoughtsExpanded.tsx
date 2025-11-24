@@ -72,6 +72,7 @@ export const ThoughtsExpanded = ({
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<"thoughts" | "blogs">("thoughts");
   const [isScrolled, setIsScrolled] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const lastScrollTop = useRef(0);
 
   const handleScroll = () => {
@@ -238,10 +239,7 @@ export const ThoughtsExpanded = ({
             </svg>
           </button>
           <button 
-            onClick={() => {
-              const input = prompt('Search thoughts:', searchQuery);
-              if (input !== null) setSearchQuery(input);
-            }}
+            onClick={() => setShowMobileSearch(true)}
             className="p-2 text-zinc-100 hover:bg-zinc-900 rounded-full transition-colors"
             aria-label="Search"
           >
@@ -264,6 +262,81 @@ export const ThoughtsExpanded = ({
           </button>
         </div>
       </div>
+
+      {/* Mobile Search Overlay */}
+      {showMobileSearch && (
+        <div className="xl:hidden fixed inset-0 bg-black z-50 flex flex-col">
+          {/* Search Header */}
+          <div className="flex items-center gap-3 p-4 border-b border-zinc-900">
+            <button 
+              onClick={() => setShowMobileSearch(false)}
+              className="p-2 hover:bg-zinc-900 rounded-full transition-colors"
+              aria-label="Close search"
+            >
+              <svg className="w-6 h-6 text-zinc-100" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              </svg>
+            </button>
+            <div className="flex-1 relative">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-600" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+              <input
+                type="text"
+                placeholder="Search thoughts..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoFocus
+                className="w-full bg-zinc-950 border border-zinc-800 rounded-full py-3 pl-12 pr-4 text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-blue-500 transition-colors"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-zinc-800 rounded-full transition-colors"
+                  aria-label="Clear search"
+                >
+                  <svg className="w-5 h-5 text-zinc-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Search Results */}
+          <div className="flex-1 overflow-y-auto">
+            {searchQuery ? (
+              <>
+                {filteredThoughts.length > 0 ? (
+                  <div>
+                    {filteredThoughts.slice(0, 20).map((thought) => (
+                      <ThoughtCard
+                        key={thought.id}
+                        thought={thought}
+                        onClick={() => {
+                          setSelectedThought(thought);
+                          setShowMobileSearch(false);
+                        }}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-12 text-center text-zinc-600">
+                    <p>No thoughts found for "{searchQuery}"</p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="p-8">
+                <h3 className="text-zinc-400 text-sm font-semibold mb-4">Recent searches</h3>
+                <div className="text-center text-zinc-600 py-8">
+                  <p>Try searching for topics, keywords, or phrases</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
