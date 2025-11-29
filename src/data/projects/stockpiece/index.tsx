@@ -104,7 +104,7 @@ export const stockPieceCell: TesseractCellData = {
   id: "stockpiece",
   title: "StockPiece",
   subtitle: "140k+ Users",
-  content: <div className="text-zinc-500 text-xs">Anime Stock Market</div>,
+  content: <div className="text-zinc-500 text-xs">Manga Stock Market</div>,
   rowSpan: 2,
   renderExpanded: ({ onClose }) => (
     <ProjectExpanded project={stockPieceProject} onClose={onClose} />

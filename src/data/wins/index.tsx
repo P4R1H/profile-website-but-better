@@ -23,6 +23,7 @@ export interface WinItem {
 }
 
 export const winsList: WinItem[] = [
+
   // HERO: Research Paper
   {
     id: "research-1",
@@ -39,6 +40,19 @@ export const winsList: WinItem[] = [
     rowSpan: 2,
     variant: 'hero',
     featured: true
+  },
+  // STAT: AWS Certification
+  {
+    id: "cert-1",
+    category: "education",
+    title: "AWS Certified",
+    organization: "Cloud Practitioner",
+    year: "2025",
+    stats: [
+      { label: "Score", value: "912" },
+      { label: "Percentile", value: "95%" }
+    ],
+    variant: 'stat',
   },
 
   // STATS: CP Ratings - Changed titles
@@ -118,25 +132,15 @@ export const winsList: WinItem[] = [
   },
 
   // DEFAULT: CTF
-  {
-    id: "comm-1",
-    category: "community",
-    title: "CTF Organizer",
-    organization: "CyberSec Club",
-    year: "2023",
-    description: "Designed 20-level CTF with zero full clears.",
-    colSpan: 1,
-    variant: 'default'
-  },
 
   // Recommendations
   {
     id: "rec-1",
     category: "community",
-    title: "HPE Recommendation",
-    organization: "Hewlett Packard Enterprise",
-    year: "2025",
-    description: "Recognized for exceptional performance in backend infrastructure development.",
+    title: "HP Recommendation",
+    organization: "HP (Omen Division)",
+    year: "2021",
+    description: "Recognized for community management and bot development for HP Omen Discord server.",
     colSpan: 1,
     variant: 'default'
   },
@@ -162,6 +166,27 @@ export const winsList: WinItem[] = [
     colSpan: 2,
     variant: 'list'
   },
+
+    {
+    id: "ctf-1",
+    category: "community",
+    title: "CTF Organizer",
+    year: "2021",
+    description: "Organized CTF for 100s of users across popular subreddits. Designed every puzzle and a discord bot to manage the event.",
+    colSpan: 2,
+    variant: 'list'
+  },
+  {
+    id: "ctf-2",
+    category: "cp",
+    title: "3x CTF Winner",
+    organization: "Online Competitions",
+    year: "2020-22",
+    description: "Participated in multiple online capture the flag competitions and won a lot of them.",
+    colSpan: 1,
+    variant: 'default'
+  },
+
   {
     id: "edu-2",
     category: "education",

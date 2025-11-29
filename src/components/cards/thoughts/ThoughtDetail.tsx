@@ -26,14 +26,14 @@ export const ThoughtDetail = ({ thought, onClose }: ThoughtDetailProps) => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
-      className="absolute inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-start justify-center overflow-y-auto"
+      className="absolute inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-start justify-center overflow-y-auto scrollbar-hide"
     >
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-[600px] bg-black border border-zinc-800 rounded-2xl my-8 mx-4"
+        className="w-full max-w-[600px] bg-black border border-zinc-800 rounded-2xl my-8 mx-4 max-h-[85vh] overflow-y-auto scrollbar-hide"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-900">
@@ -51,14 +51,21 @@ export const ThoughtDetail = ({ thought, onClose }: ThoughtDetailProps) => {
           <div className="flex items-start gap-3 mb-3">
             <img 
               src="https://avatars.githubusercontent.com/u/76397616?v=4"
-              alt="Parth G"
+              alt="Parth"
               className="w-12 h-12 rounded-full"
             />
             <div>
-              <div className="font-bold text-zinc-100">Parth G</div>
+              <div className="font-bold text-zinc-100">Parth</div>
               <div className="text-zinc-600 text-sm">@parthg</div>
             </div>
           </div>
+
+          {/* Title (for blogs) */}
+          {thought.title && thought.tags?.includes("blog") && (
+            <div className="font-bold text-zinc-100 text-[23px] leading-tight mb-4">
+              {thought.title}
+            </div>
+          )}
 
           {/* Thought Text */}
           <div className="text-zinc-100 text-[17px] leading-relaxed whitespace-pre-wrap mb-4">

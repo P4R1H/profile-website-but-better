@@ -45,6 +45,7 @@ export const newsItems: NewsItem[] = [
   {
     category: "Portfolio",
     title: "New website who this",
+    subtitle: "Yes I know I could've added comment functionality",
     time: "5h ago",
     posts: "89K"
   },
@@ -72,16 +73,167 @@ export const peopleToFollow: PersonToFollow[] = [
 
 export const thoughtsList: ThoughtItem[] = [
   {
+    id: "blog-blinkit-interview",
+    title: "Blinkit Interview Experience",
+    content: `Role: SDE-1 Backend <> Verdict: Selected
+
+R1 - DSA (1.5H)
+30m resume discussion, then:
+• Product of Array Except Self
+• Rotting Oranges (BFS)
+• Union-Find variant
+• Count Square Submatrices (DP)
+
+SQL: 2nd highest rank query, person rank by ID
+
+First technical interview, made errors but interviewer was understanding. 
+Asked difference between out of bounds vs segmentation fault when I made an error in the code.
+
+R2 - System Design (1H15M)
+Design SAAS for company note-sharing with access control.
+
+- LLD (code), HLD, Database design, API design
+
+Grilled on:
+• File storage vs blob storage
+• Microservice boundaries
+• Database per service
+• REST vs gRPC
+• SQL vs NoSQL
+• PATCH vs PUT
+
+Advice: "Focus on requirements before scaling"
+
+R3 - Cultural Fit (30M)
+Expected HR, got technical!
+
+• Why Blinkit?
+• Why logistics over pure tech?
+• Deep dive on ML internship
+• OOPs vs Functional Programming
+`,
+    date: "Nov 28",
+    readTime: "2 min",
+    tags: ["blog", "interviews", "system-design", "career"],
+    isPinned: false,
+    likes: 84200,
+    retweets: 12300,
+    replies: 3400,
+  },
+  {
+    id: "blog-sprinklr-interview",
+    title: "Sprinklr Interview Experience",
+    content: `Role: Product Intern <> Verdict: Selected
+
+R1 - DSA (45M)
+• 4Sum (O(n²))
+• LRU Cache
+
+R2 - Everything (45M → 1H30M)
+
+Behavioral:
+• What drives you to build products?
+• Shipping under deadline pressure
+
+Deduplication System Deep Dive:
+Took my project to production scale.
+
+• 10k+ event types, auto TTL configuration
+• Cache management with skewed observation windows
+• Metrics for dedup performance
+• Cache failure recovery strategies
+• Multi-tenant configuration system
+
+Designed YAML config:
+• TTL modes: Fixed, Adaptive, Custom
+• Cache type selection
+• boolean isDuplicate(event E)
+
+Coding:
+Implement adaptive TTL algorithm in Python.
+• Event frequency tracking
+• Dynamic TTL adjustment
+• Self-healing, stable
+
+DSA:
+Equation validation (A==B, A!=B)
+• O(N) + O(N²) space → rejected
+• Union-Find → "optimize more"
+• Path compression + union by rank → approved
+
+R3 - C&T (30M)
+• Why not campus?
+• Dream company?
+• Other interviews?
+• HPE internship decision
+• AI impact on recruiting
+
+Ended discussing chole kulche.
+`,
+    date: "Nov 27",
+    readTime: "2 min",
+    tags: ["blog", "interviews", "system-design", "architecture"],
+    isPinned: false,
+    likes: 67800,
+    retweets: 9200,
+    replies: 2800,
+  },
+  {
+    id: "blog-cred-interview",
+    title: "CRED Interview Experience",
+    content: `Role: SDE-1 Backend <> Verdict: Selected
+
+R1 - Vibe Check
+Senior leader conversation.
+
+R2 - RCA + System Design
+Senior Leader.
+
+RCA: Real production issue.
+• Root cause identification
+• Solutions with tradeoffs
+• Monitoring and prevention
+
+Discussd a lot of possible solutions to a problem.
+
+System Design: Contextual problem.
+• Real constraints
+• Business logic
+• When NOT to optimize
+
+Genuine technical discussion, Defended decisions, challenged assumptions etc.
+
+R3 - LLD Assignment
+Build a working application.
+
+• Clean code
+• SOLID principles
+• Design patterns
+• Proper abstractions
+• Tests and docs
+
+Really liked the lack of a DSA round, I feel like system design is a much better metric.
+
+Verdict: Selected`,
+    date: "Nov 26",
+    readTime: "2 min",
+    tags: ["blog", "interviews", "system-design", "career", "philosophy"],
+    isPinned: false,
+    likes: 92500,
+    retweets: 15600,
+    replies: 4100,
+  },
+  {
     id: "thought-1",
     title: "Hello world",
-    content: "Namaste",
+    content: "skeptics run the world.",
     date: "Nov 24",
     readTime: "2 min",
     tags: ["philosophy", "engineering"],
     isPinned: true,
-    likes: 42,
-    retweets: 12,
-    replies: 5,
+    likes: 42000,
+    retweets: 12000,
+    replies: 5000,
     bookmarks: 28,
   },
 ];

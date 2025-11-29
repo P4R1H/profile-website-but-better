@@ -2,123 +2,173 @@
 
 import { ThoughtItem } from "./ThoughtsExpanded";
 import { MessageCircle, Repeat2, Heart, Bookmark, Share, Pin } from "lucide-react";
-import { memo } from "react";
+import { memo, useState } from "react";
 
 interface ThoughtCardProps {
   thought: ThoughtItem;
-  onClick: () => void;
+  onClick?: () => void;
 }
 
-const formatTimestamp = (date: string) => date;
+// Shared utility
+export const formatNumber = (num: number): string => {
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+  }
+  return num.toString();
+};
+
+// Icon wrapper with hover background
+const IconWrapper = ({ children, hoverBg }: { children: React.ReactNode; hoverBg: string }) => (
+  <div className={`w-[34.75px] h-[34.75px] flex items-center justify-center rounded-full transition-colors -mr-1 ${hoverBg}`}>
+    {children}
+  </div>
+);
 
 export const ThoughtCard = memo(({ thought, onClick }: ThoughtCardProps) => {
+  const [isLiked, setIsLiked] = useState(false);
+  const [isRetweeted, setIsRetweeted] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [localLikes, setLocalLikes] = useState(thought.likes || 0);
+  const [localRetweets, setLocalRetweets] = useState(thought.retweets || 0);
+
+  const isBlog = thought.tags?.includes("blog");
+
+  const handleAction = (e: React.MouseEvent, action: () => void) => {
+    e.stopPropagation();
+    action();
+  };
 
   return (
     <article 
       onClick={onClick}
-      className="border-b border-zinc-900 px-4 py-3 hover:bg-zinc-950 transition-colors cursor-pointer"
+      className={`border-b border-[#2F3336] transition-colors ${onClick ? 'hover:bg-[#080808] cursor-pointer' : ''}`}
     >
-      <div className="flex gap-3">
+      <div className="flex gap-3 px-4 pt-3 pb-1">
         {/* Avatar */}
         <img 
           src="https://avatars.githubusercontent.com/u/76397616?v=4"
-          alt="Parth G"
-          className="w-10 h-10 rounded-full shrink-0"
+          alt="Parth"
+          className="w-12 h-12 rounded-full shrink-0"
         />
 
         {/* Content */}
         <div className="flex-1 min-w-0">
           {/* Header */}
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-bold text-zinc-100 hover:underline">Parth G</span>
-            <span className="text-zinc-600 text-sm">@parthg</span>
-            <span className="text-zinc-600 text-sm">·</span>
-            <span className="text-zinc-600 text-sm hover:underline">{formatTimestamp(thought.date)}</span>
-            
+          <div className="flex items-center gap-1 text-[15px] leading-5 mb-0.5">
+            <span className="font-bold text-[#E7E9EA] hover:underline cursor-pointer">Parth</span>
+            <span className="text-[#71767B]">@parthg</span>
+            <span className="text-[#71767B]">·</span>
+            <span className="text-[#71767B] hover:underline cursor-pointer">{thought.date}</span>
             {thought.isPinned && (
               <>
-                <span className="text-zinc-600 text-sm">·</span>
-                <Pin className="w-3 h-3 text-zinc-600" />
+                <span className="text-[#71767B]">·</span>
+                <Pin className="w-3.5 h-3.5 text-[#71767B]" />
               </>
             )}
           </div>
 
-          {/* Thought Content */}
-          <div className="text-zinc-100 text-[15px] leading-normal whitespace-pre-wrap mb-3">
-            {thought.content}
+          {/* Blog Title */}
+          {thought.title && isBlog && (
+            <div className="text-[15px] leading-5 font-bold text-[#E7E9EA] mt-1 mb-1">
+              {thought.title}
+            </div>
+          )}
+
+          {/* Content Body */}
+          <div className="relative mt-1">
+            <div className={`font-normal text-[#E7E9EA] whitespace-pre-wrap wrap-break-word ${
+              isBlog ? "text-[15px] leading-5" : "text-[17px] leading-[22px]"
+            }`}>
+              {isBlog ? thought.content.split('\n').slice(0, 3).join('\n') : thought.content}
+            </div>
+            {isBlog && thought.content.split('\n').length > 3 && (
+              <div className="absolute -bottom-3 left-0 right-0 h-10 bg-linear-to-t from-black via-black/50 to-transparent pointer-events-none" />
+            )}
           </div>
 
           {/* Image */}
           {thought.image && (
-            <div className="mb-3 rounded-2xl overflow-hidden border border-zinc-800">
-              <img 
-                src={thought.image}
-                alt={thought.title}
-                className="w-full object-cover"
-                loading="lazy"
-              />
+            <div className="mt-3 mb-3 rounded-2xl overflow-hidden border border-[#2F3336]">
+              <img src={thought.image} alt={thought.title} className="w-full h-auto" loading="lazy" />
             </div>
           )}
 
           {/* Action Bar */}
-          <div className="flex items-center justify-between max-w-md mt-2">
+          <div className="flex items-center justify-between max-w-[425px] mt-3 mb-1 -ml-2">
+            {/* Reply */}
             <button 
-              className="flex items-center gap-2 text-zinc-600 hover:text-blue-500 group transition-colors"
+              className="flex items-center text-[#71767B] hover:text-[#1D9BF0] group transition-colors"
               onClick={(e) => e.stopPropagation()}
               aria-label="Reply"
             >
-              <div className="p-2 rounded-full group-hover:bg-blue-500/10 transition-colors">
-                <MessageCircle className="w-[18px] h-[18px]" />
-              </div>
-              {thought.replies && thought.replies > 0 && (
-                <span className="text-sm">{thought.replies}</span>
+              <IconWrapper hoverBg="group-hover:bg-[#1D9BF0]/10">
+                <MessageCircle className="w-[18.75px] h-[18.75px]" strokeWidth={2} />
+              </IconWrapper>
+              {(thought.replies ?? 0) > 0 && (
+                <span className="text-[13px] tabular-nums">{formatNumber(thought.replies!)}</span>
               )}
             </button>
 
+            {/* Retweet */}
             <button 
-              className="flex items-center gap-2 text-zinc-600 hover:text-green-500 group transition-colors"
-              onClick={(e) => e.stopPropagation()}
+              className={`flex items-center group transition-colors ${
+                isRetweeted ? 'text-[#00BA7C]' : 'text-[#71767B] hover:text-[#00BA7C]'
+              }`}
+              onClick={(e) => handleAction(e, () => {
+                setIsRetweeted(!isRetweeted);
+                setLocalRetweets(prev => isRetweeted ? prev - 1 : prev + 1);
+              })}
               aria-label="Retweet"
             >
-              <div className="p-2 rounded-full group-hover:bg-green-500/10 transition-colors">
-                <Repeat2 className="w-[18px] h-[18px]" />
-              </div>
-              {thought.retweets && thought.retweets > 0 && (
-                <span className="text-sm">{thought.retweets}</span>
+              <IconWrapper hoverBg="group-hover:bg-[#00BA7C]/10">
+                <Repeat2 className="w-[18.75px] h-[18.75px]" strokeWidth={2} />
+              </IconWrapper>
+              {localRetweets > 0 && (
+                <span className="text-[13px] tabular-nums">{formatNumber(localRetweets)}</span>
               )}
             </button>
 
+            {/* Like */}
             <button 
-              className="flex items-center gap-2 text-zinc-600 hover:text-red-500 group transition-colors"
-              onClick={(e) => e.stopPropagation()}
+              className={`flex items-center group transition-colors ${
+                isLiked ? 'text-[#F91880]' : 'text-[#71767B] hover:text-[#F91880]'
+              }`}
+              onClick={(e) => handleAction(e, () => {
+                setIsLiked(!isLiked);
+                setLocalLikes(prev => isLiked ? prev - 1 : prev + 1);
+              })}
               aria-label="Like"
             >
-              <div className="p-2 rounded-full group-hover:bg-red-500/10 transition-colors">
-                <Heart className="w-[18px] h-[18px]" />
-              </div>
-              {thought.likes && thought.likes > 0 && (
-                <span className="text-sm">{thought.likes}</span>
+              <IconWrapper hoverBg="group-hover:bg-[#F91880]/10">
+                <Heart className={`w-[18.75px] h-[18.75px] ${isLiked ? 'fill-current' : ''}`} strokeWidth={2} />
+              </IconWrapper>
+              {localLikes > 0 && (
+                <span className="text-[13px] tabular-nums">{formatNumber(localLikes)}</span>
               )}
             </button>
 
+            {/* Bookmark */}
             <button 
-              className="flex items-center gap-2 text-zinc-600 hover:text-blue-500 group transition-colors"
-              onClick={(e) => e.stopPropagation()}
+              className={`flex items-center group transition-colors ${
+                isBookmarked ? 'text-[#1D9BF0]' : 'text-[#71767B] hover:text-[#1D9BF0]'
+              }`}
+              onClick={(e) => handleAction(e, () => setIsBookmarked(!isBookmarked))}
               aria-label="Bookmark"
             >
-              <div className="p-2 rounded-full group-hover:bg-blue-500/10 transition-colors">
-                <Bookmark className="w-[18px] h-[18px]" />
-              </div>
+              <IconWrapper hoverBg="group-hover:bg-[#1D9BF0]/10">
+                <Bookmark className={`w-[18.75px] h-[18.75px] ${isBookmarked ? 'fill-current' : ''}`} strokeWidth={2} />
+              </IconWrapper>
             </button>
 
+            {/* Share */}
             <button 
-              className="flex items-center gap-2 text-zinc-600 hover:text-blue-500 group transition-colors"
+              className="flex items-center text-[#71767B] hover:text-[#1D9BF0] group transition-colors"
               onClick={(e) => e.stopPropagation()}
               aria-label="Share"
             >
-              <div className="p-2 rounded-full group-hover:bg-blue-500/10 transition-colors">
-                <Share className="w-[18px] h-[18px]" />
-              </div>
+              <IconWrapper hoverBg="group-hover:bg-[#1D9BF0]/10">
+                <Share className="w-[18.75px] h-[18.75px]" strokeWidth={2} />
+              </IconWrapper>
             </button>
           </div>
         </div>
@@ -126,3 +176,5 @@ export const ThoughtCard = memo(({ thought, onClick }: ThoughtCardProps) => {
     </article>
   );
 });
+
+ThoughtCard.displayName = "ThoughtCard";
