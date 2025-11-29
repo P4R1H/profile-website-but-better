@@ -44,7 +44,6 @@ export const ThoughtCard = memo(({ thought, onClick }: ThoughtCardProps) => {
       className={`border-b border-[#2F3336] transition-colors ${onClick ? 'hover:bg-[#080808] cursor-pointer' : ''}`}
     >
       <div className="flex gap-3 px-4 pt-3 pb-1">
-        {/* Avatar */}
         <img 
           src="https://avatars.githubusercontent.com/u/76397616?v=4"
           alt="Parth"

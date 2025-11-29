@@ -21,6 +21,7 @@ export interface HostingInfo {
 export interface ProjectLinks {
   live?: string;
   github?: string;
+  resume?: string;
 }
 
 // Individual perspective types
