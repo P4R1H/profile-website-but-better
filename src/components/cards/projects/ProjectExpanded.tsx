@@ -23,7 +23,7 @@ interface ProjectExpandedProps {
 const ProjectHero = ({ project }: { project: ProjectData }) => {
   return (
     <div className="relative w-full">
-      <div className="relative z-10 px-6 md:px-12 pt-6 md:pt-8 pb-4 md:pb-6">
+      <div className="px-4 md:px-12 pt-6 md:pt-8 pb-4 md:pb-6">
         <div className="flex items-start justify-between gap-6">
           {/* Left Content */}
           <div className="flex-1 min-w-0">
@@ -119,7 +119,15 @@ const PERSPECTIVE_LABELS: Record<PerspectiveType, string> = {
   architecture: "Architecture",
 };
 
-const PerspectiveAccordion = ({ project, isMobile }: { project: ProjectData; isMobile: boolean }) => {
+const PerspectiveAccordion = ({ 
+  project, 
+  isMobile,
+  scrollContainerRef 
+}: { 
+  project: ProjectData; 
+  isMobile: boolean;
+  scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
+}) => {
   // Determine which perspectives are available
   const allPerspectives: PerspectiveConfig[] = [
     { id: "product" as PerspectiveType, label: PERSPECTIVE_LABELS.product, available: !!project.product },
@@ -130,12 +138,11 @@ const PerspectiveAccordion = ({ project, isMobile }: { project: ProjectData; isM
   
   const perspectives = allPerspectives.filter(p => p.available);
 
-  // Desktop: first tab open by default, Mobile: all closed
-  const [activeId, setActiveId] = useState<PerspectiveType | null>(
-    !isMobile && perspectives.length > 0 ? perspectives[0].id : null
-  );
+  // Start with all perspectives collapsed
+  const [activeId, setActiveId] = useState<PerspectiveType | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const accordionRefs = useRef<Map<PerspectiveType, HTMLDivElement>>(new Map());
   const [showBottomBlur, setShowBottomBlur] = useState(false);
 
   const handleScroll = () => {
@@ -147,6 +154,31 @@ const PerspectiveAccordion = ({ project, isMobile }: { project: ProjectData; isM
   useEffect(() => {
     handleScroll();
   }, [activeId]);
+
+  // Auto-scroll to opened accordion on mobile
+  const handleAccordionToggle = (perspectiveId: PerspectiveType, isCurrentlyActive: boolean) => {
+    const newActiveId = isCurrentlyActive ? null : perspectiveId;
+    setActiveId(newActiveId);
+    
+    // Auto-scroll to the accordion header on mobile when opening
+    if (isMobile && newActiveId && scrollContainerRef?.current) {
+      const accordionEl = accordionRefs.current.get(perspectiveId);
+      if (accordionEl) {
+        // Wait for the accordion animation to start
+        setTimeout(() => {
+          const containerRect = scrollContainerRef.current!.getBoundingClientRect();
+          const accordionRect = accordionEl.getBoundingClientRect();
+          const scrollTop = scrollContainerRef.current!.scrollTop;
+          const targetScroll = scrollTop + accordionRect.top - containerRect.top - 12; // 12px offset from top
+          
+          scrollContainerRef.current!.scrollTo({
+            top: targetScroll,
+            behavior: 'smooth'
+          });
+        }, 50);
+      }
+    }
+  };
 
   const renderPerspectiveContent = (id: PerspectiveType) => {
     switch (id) {
@@ -229,82 +261,72 @@ const PerspectiveAccordion = ({ project, isMobile }: { project: ProjectData; isM
     );
   }
 
-  // Mobile: Vertical Accordion with scrollable content
+  // Mobile: Vertical Accordion - no scroll container, parent handles scrolling
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden relative">
-      <div
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="flex-1 overflow-y-auto scrollbar-hide space-y-2 pb-8"
-      >
-        {perspectives.map((perspective) => {
-          const isActive = activeId === perspective.id;
-          
-          return (
-            <div
-              key={perspective.id}
-              className="border border-zinc-800 bg-zinc-950/50 overflow-hidden"
+    <div className="w-full space-y-2 pb-8">
+      {perspectives.map((perspective) => {
+        const isActive = activeId === perspective.id;
+        
+        return (
+          <div
+            key={perspective.id}
+            ref={(el) => {
+              if (el) accordionRefs.current.set(perspective.id, el);
+            }}
+            className="border border-zinc-800 bg-zinc-950/50 overflow-hidden"
+          >
+            {/* Accordion Header */}
+            <button
+              onClick={() => handleAccordionToggle(perspective.id, isActive)}
+              className={`w-full flex items-center justify-between px-4 py-3 transition-colors ${
+                isActive ? "bg-zinc-900/50" : "hover:bg-zinc-900/30"
+              }`}
             >
-              {/* Accordion Header */}
-              <button
-                onClick={() => setActiveId(isActive ? null : perspective.id)}
-                className={`w-full flex items-center justify-between px-4 py-3 transition-colors ${
-                  isActive ? "bg-zinc-900/50" : "hover:bg-zinc-900/30"
-                }`}
-              >
-                <span className={`text-sm font-medium transition-colors ${
-                  isActive ? "text-zinc-100" : "text-zinc-400"
-                }`}>
-                  {perspective.label}
-                </span>
-                
-                {/* Chevron */}
-                <motion.div
-                  animate={{ rotate: isActive ? 180 : 0 }}
-                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                  className="text-zinc-500"
-                >
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path 
-                      d="M4 6L8 10L12 6" 
-                      stroke="currentColor" 
-                      strokeWidth="1.5" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </motion.div>
-              </button>
-
-              {/* Accordion Content - Reveal Animation */}
+              <span className={`text-sm font-medium transition-colors ${
+                isActive ? "text-zinc-100" : "text-zinc-400"
+              }`}>
+                {perspective.label}
+              </span>
+              
+              {/* Chevron */}
               <motion.div
-                initial={false}
-                animate={{
-                  height: isActive ? "auto" : 0,
-                  opacity: isActive ? 1 : 0,
-                }}
-                transition={{
-                  height: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
-                  opacity: { duration: 0.3, delay: isActive ? 0.1 : 0 },
-                }}
-                className="overflow-hidden"
+                animate={{ rotate: isActive ? 180 : 0 }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                className="text-zinc-500"
               >
-                {/* Inner content wrapper - this creates the "reveal" effect */}
-                <div className="px-4 pb-4 pt-2">
-                  {renderPerspectiveContent(perspective.id)}
-                </div>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path 
+                    d="M4 6L8 10L12 6" 
+                    stroke="currentColor" 
+                    strokeWidth="1.5" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  />
+                </svg>
               </motion.div>
-            </div>
-          );
-        })}
-      </div>
+            </button>
 
-      {/* Bottom Blur for mobile - positioned relative to this container */}
-      <div
-        className={`absolute bottom-0 left-0 right-0 h-16 bg-linear-to-t from-black via-black/80 to-transparent pointer-events-none transition-opacity duration-300 ${
-          showBottomBlur ? "opacity-100" : "opacity-0"
-        }`}
-      />
+            {/* Accordion Content - Reveal Animation */}
+            <motion.div
+              initial={false}
+              animate={{
+                height: isActive ? "auto" : 0,
+                opacity: isActive ? 1 : 0,
+              }}
+              transition={{
+                height: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+                opacity: { duration: 0.3, delay: isActive ? 0.1 : 0 },
+              }}
+              className="overflow-hidden"
+            >
+              {/* Inner content wrapper - this creates the "reveal" effect */}
+              <div className="px-4 pb-4 pt-2">
+                {renderPerspectiveContent(perspective.id)}
+              </div>
+            </motion.div>
+          </div>
+        );
+      })}
     </div>
   );
 };
@@ -315,6 +337,8 @@ const PerspectiveAccordion = ({ project, isMobile }: { project: ProjectData; isM
 
 export const ProjectExpanded = ({ project, onClose }: ProjectExpandedProps) => {
   const [isMobile, setIsMobile] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [showBottomBlur, setShowBottomBlur] = useState(false);
 
   // Detect mobile
   useEffect(() => {
@@ -326,20 +350,45 @@ export const ProjectExpanded = ({ project, onClose }: ProjectExpandedProps) => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  // Handle scroll for blur visibility on mobile
+  const handleScroll = () => {
+    if (!scrollContainerRef.current || !isMobile) return;
+    const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+    setShowBottomBlur(scrollHeight - scrollTop - clientHeight > 10);
+  };
+
+  useEffect(() => {
+    handleScroll();
+    window.addEventListener("resize", handleScroll);
+    return () => window.removeEventListener("resize", handleScroll);
+  }, [isMobile]);
+
   return (
-    <div className="w-full h-full bg-black relative overflow-hidden flex flex-col">
-      {/* Top Gradient */}
-      <div className="absolute top-0 left-0 right-0 h-8 md:h-12 bg-linear-to-b from-black via-black/80 to-transparent z-10 pointer-events-none" />
+    <div className="w-full h-full bg-black relative overflow-hidden">
+      {/* Top Gradient - positioned so it only blurs content as it exits viewport */}
+      <div className="absolute -top-2 left-0 right-0 h-8 md:h-12 md:top-0 bg-linear-to-b from-black to-transparent z-10 pointer-events-none" />
 
-      {/* Fixed Hero Section */}
-      <div className="shrink-0 max-w-4xl mx-auto w-full">
-        <ProjectHero project={project} />
+      {/* Scroll Container */}
+      <div 
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+        className="w-full h-full overflow-y-auto md:overflow-hidden flex flex-col scrollbar-hide"
+      >
+        {/* Hero Section - Fixed on desktop, scrolls with page on mobile */}
+        <div className="shrink-0 max-w-4xl mx-auto w-full">
+          <ProjectHero project={project} />
+        </div>
+
+        {/* Perspectives Section - Scrollable on desktop, flows naturally on mobile */}
+        <div className="flex-1 md:min-h-0 max-w-4xl mx-auto w-full px-4 md:px-12 pt-4 md:pt-0">
+          <PerspectiveAccordion project={project} isMobile={isMobile} scrollContainerRef={scrollContainerRef} />
+        </div>
       </div>
 
-      {/* Perspectives Section - This is the only scrollable area */}
-      <div className="flex-1 min-h-0 max-w-4xl mx-auto w-full px-6 md:px-12 pt-4 md:pt-0">
-        <PerspectiveAccordion project={project} isMobile={isMobile} />
-      </div>
+      {/* Bottom Gradient - always visible, fades based on scroll */}
+      <div className={`md:hidden absolute -bottom-8 left-0 right-0 h-24 bg-linear-to-t from-black via-black/80 to-transparent z-10 pointer-events-none transition-opacity duration-300 ${
+        showBottomBlur ? 'opacity-100' : 'opacity-0'
+      }`} />
     </div>
   );
 };
