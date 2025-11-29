@@ -6,12 +6,13 @@ export const conscentData = {
   role: "Data Science Intern",
   location: "Delhi, India",
   period: "June 2023 – July 2023",
-  description: "Big Data Analysis for C-suite decision-making.",
+  description: "My first internship at a startup building AI-driven insights for website analytics. Got to experience the full product development lifecycle.",
   highlights: [
-    "Big Data Analysis: Analyzed 200GB+ of data across MongoDB and ClickHouse to drive C-suite decision-making.",
-    "Automation: Created Python scripts that reduced analysis-to-insight turnaround time by 60%.",
+    "Data Analysis: Extracted and analyzed data from MongoDB and ClickHouse for C-suite presentations while participating in product development meetings.",
+    "Automation: Worked with 200GB+ of data across distributed databases, creating Python scripts that reduced analysis-to-insight time by 60%.",
+    "Learning: Gained exposure to full product lifecycle in a fast-paced startup environment, contributing to product decisions.",
   ],
-  stack: ["Python", "MongoDB", "ClickHouse"],
+  stack: ["Python", "MongoDB", "ClickHouse", "Matplotlib"],
 };
 
 export const conscentCell: TesseractCellData = {

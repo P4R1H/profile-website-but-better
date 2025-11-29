@@ -6,11 +6,11 @@ export const ecomData = {
   role: "Applied Machine Learning Intern",
   location: "Gurgaon, India",
   period: "May 2024 – July 2024",
-  description: "Deploying Computer Vision at scale for logistics safety.",
+  description: "Built an end-to-end helmet detection system for 30,000+ field executives. Got full ownership from data collection to deployment.",
   highlights: [
-    "Safety Compliance: Implemented a CNN-based helmet detection model with 97% accuracy for 30,000+ field executives.",
-    "Real-time Validation: Processed 5,000+ daily validations with a 10ms API response time.",
-    "Identity Verification: Created a facial embedding system using transfer learning to verify personnel across 1,000+ delivery hubs.",
+    "Model Development: Built CNN-based helmet detection model achieving 99.7% validation accuracy using ResNet50 transfer learning for 30,000+ field executives.",
+    "Deployment: Deployed FastAPI endpoints processing 5,000+ daily validations with 10ms response time.",
+    "Identity Verification: Created facial embedding system using transfer learning for identity verification across 1,000+ delivery hubs.",
   ],
   stack: ["Python", "TensorFlow", "Keras", "FastAPI", "MongoDB"],
 };

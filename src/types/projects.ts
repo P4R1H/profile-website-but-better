@@ -78,6 +78,7 @@ export interface ProjectListItem {
   description: string;
   highlight?: string; // Key metric like "150k users"
   stack?: string[]; // Tech stack icons (skillicons keys)
+  links?: ProjectLinks; // Optional GitHub/live links
   isExpandable: boolean;
   projectData?: ProjectData; // Full data if expandable
 }

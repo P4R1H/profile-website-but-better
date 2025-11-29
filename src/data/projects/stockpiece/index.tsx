@@ -6,7 +6,7 @@ import { ProjectExpanded } from "@/components/cards/projects/ProjectExpanded";
 export const stockPieceProject: ProjectData = {
   id: "stockpiece",
   name: "StockPiece",
-  tagline: "A mock financial market for anime characters that scaled to 150,000+ users globally.",
+  tagline: "A mock financial market where One Piece fans trade character stocks like real investments. Scaled to 140,000+ users across 100+ countries.",
   category: "Web",
   year: "2024",
   icon: "/projects/berry.webp", // Add project icon
@@ -17,46 +17,46 @@ export const stockPieceProject: ProjectData = {
 
   // Product Perspective
   product: {
-    tldr: "Built a fantasy stock market where users trade anime characters like real stocks — complete with market dynamics, volatility, and community-driven price discovery.",
+    tldr: "Built a fantasy stock market where One Piece fans trade character stocks like real investments. Market windows sync with TCB chapter releases to create fair, event-driven trading.",
     points: [
       {
-        highlight: "Problem:",
-        text: "Anime fans had no engaging way to express opinions on character popularity beyond polls and tier lists."
-      },
-      {
-        highlight: "Solution:",
-        text: "A gamified market simulation where character prices reflect community sentiment in real-time."
-      },
-      {
         highlight: "140,000+ users",
-        text: "from 100+ countries joined within the first 3 months of launch."
+        text: "from 100+ countries trading character stocks based on their agendas and manga events."
       },
       {
         highlight: "8M+ monthly API requests",
-        text: "at peak traffic, requiring careful optimization and caching strategies."
+        text: "at peak traffic, maintaining 99.9% uptime on distributed Hetzner infrastructure."
       },
       {
-        highlight: "Community-driven:",
-        text: "Active Discord with 5,000+ members providing feedback and feature requests."
+        highlight: "Market Mechanics:",
+        text: "Trading windows open during official chapter releases and close before leaks to prevent insider trading. Prices driven by volume, popularity, and market momentum."
+      },
+      {
+        highlight: "Fair Competition:",
+        text: "Everyone starts with 10,000 Berries. Climb the leaderboard by maximizing net worth through strategic trading."
+      },
+      {
+        highlight: "Community:",
+        text: "Active Discord with thousands of members sharing strategies, analyzing trends, and pushing their One Piece agendas."
       },
     ],
   },
 
   // Engineering Perspective
   engineering: {
-    summary: "Full-stack TypeScript application with a custom market algorithm that updates 100+ stock prices weekly based on trading volume and logarithmic dampening.",
-    stack: ["ts", "react", "nodejs", "express", "mongodb", "redis", "docker", "cloudflare"],
+    summary: "Full-stack TypeScript application with a custom engagement algorithm updating 100+ stock prices weekly using volume impact and logarithmic dampening to prevent market manipulation.",
+    stack: ["ts", "react", "vite", "nodejs", "express", "mongodb", "redis", "docker", "cloudflare"],
   },
 
   // Design Perspective
   design: {
-    summary: "Designed for instant comprehension — users should understand the game within 30 seconds of landing.",
-    screenshot: "projects/stockpiece.jpg", // Project screenshot
+    summary: "Playful yet functional design optimized for mobile-first usage. Users should understand how to trade within 30 seconds of landing.",
+    screenshot: "projects/stockpiece.jpg",
     decisions: [
-      { key: "Style", value: "Clean, data-forward (inspired by Robinhood)" },
-      { key: "Density", value: "High-glanceability, low cognitive load" },
-      { key: "Color System", value: "Green/Red for gains/losses, muted backgrounds" },
-      { key: "Mobile First", value: "70% of traffic came from mobile devices" },
+      { key: "Style", value: "Playful One Piece theming with clean, data-forward interface" },
+      { key: "UX Priority", value: "Mobile-first responsive design, high-glanceability" },
+      { key: "Color System", value: "Green/Red for gains/losses, Berries currency theming" },
+      { key: "Charts", value: "Interactive price histories to analyze character popularity trends" },
     ],
   },
 
@@ -92,8 +92,8 @@ export const stockPieceListItem: ProjectListItem = {
   name: "StockPiece",
   category: "Web",
   year: "2024",
-  description: "Mock financial market for anime characters, 150k+ users",
-  highlight: "150k+ users",
+  description: "One Piece character stock market, 140k+ users, 8M+ monthly requests",
+  highlight: "140k+ users",
   stack: ["ts", "react", "mongodb", "redis"],
   isExpandable: true,
   projectData: stockPieceProject,
@@ -103,9 +103,9 @@ export const stockPieceListItem: ProjectListItem = {
 export const stockPieceCell: TesseractCellData = {
   id: "stockpiece",
   title: "StockPiece",
-  subtitle: "150k+ Users",
-  content: <div className="text-zinc-500 text-xs">Web Application</div>,
-  rowSpan: 1,
+  subtitle: "140k+ Users",
+  content: <div className="text-zinc-500 text-xs">Anime Stock Market</div>,
+  rowSpan: 2,
   renderExpanded: ({ onClose }) => (
     <ProjectExpanded project={stockPieceProject} onClose={onClose} />
   ),

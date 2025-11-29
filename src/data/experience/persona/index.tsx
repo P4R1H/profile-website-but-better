@@ -4,14 +4,15 @@ import { ExperienceExpanded } from "@/components/cards/experience/ExperienceExpa
 export const personaData = {
   company: "Persona Essential",
   role: "Team Lead & Full-Stack Developer",
-  location: "Freelance",
+  location: "Remote",
   period: "Mar 2021 – Dec 2023",
-  description: "Leading a team of creators and building full-stack infrastructure.",
+  description: "Built the entire technical infrastructure for a stealth advertising firm while leading strategy and managing a team of 100+ creators.",
   highlights: [
-    "Leadership: Led a team of 90+ creators, managing content strategy for clients like OperaGX, Polymarket, and Dreamworks.",
-    "Impact: Architected a full-stack platform centralizing $200,000+ in lifetime payments and delivering 400M+ impressions.",
+    "Full-Stack Development: Developed complete technical infrastructure including website, admin platform, and Discord bot managing 100+ creators.",
+    "Strategy & Leadership: Led social media advertising strategy for clients like OperaGX, Polymarket, and Dreamworks, organizing campaigns across multiple platforms.",
+    "Scale: Platform processed $200,000+ in payments and delivered 400M+ impressions across campaigns.",
   ],
-  stack: ["NextJS", "Python", "MongoDB"],
+  stack: ["NextJS", "Python", "MongoDB", "Discord.js"],
 };
 
 export const personaCell: TesseractCellData = {

@@ -6,11 +6,11 @@ export const hpeData = {
   role: "Project Intern (Backend Infrastructure)",
   location: "Remote",
   period: "Feb 2025 – July 2025",
-  description: "Optimizing server management and event processing.",
+  description: "Built middleware between Redfish Event Service and RabbitMQ to deduplicate server monitoring events.",
   highlights: [
-    "Event Deduplication: Designed a Redfish event engine processing 10,000+ daily alerts, reducing redundant notifications by 70%.",
-    "Performance: Achieved a 2ms median processing time via a configurable cache-and-expiry mechanism.",
-    "Benchmarking: Built a suite to test 15+ event patterns, ensuring system stability across operational modes.",
+    "Middleware Design: Developed middleware with configurable cache-and-expiry mechanism deduplicating events between Redfish Event Service and RabbitMQ.",
+    "Performance: Processing 10,000+ daily alerts with 2ms median processing time, achieving 70% reduction in redundant notifications in worst-case scenarios.",
+    "Testing Infrastructure: Built web-based benchmarking suite testing 15+ event patterns across multiple operational modes with real-time metrics.",
   ],
   stack: ["Python", "NextJS", "RabbitMQ", "RedfishES"],
 };

@@ -138,8 +138,24 @@ const PerspectiveAccordion = ({
   
   const perspectives = allPerspectives.filter(p => p.available);
 
-  // Start with all perspectives collapsed
-  const [activeId, setActiveId] = useState<PerspectiveType | null>(null);
+  // On desktop, open Product by default. On mobile, keep all collapsed
+  const [activeId, setActiveId] = useState<PerspectiveType | null>(() => {
+    if (isMobile) return null;
+    // Default to Product perspective if available, otherwise first available
+    return perspectives.find(p => p.id === "product")?.id || perspectives[0]?.id || null;
+  });
+
+  // Update activeId when switching between mobile and desktop
+  useEffect(() => {
+    if (!isMobile && activeId === null) {
+      // Switching to desktop - open Product or first available
+      const defaultId = perspectives.find(p => p.id === "product")?.id || perspectives[0]?.id || null;
+      setActiveId(defaultId);
+    } else if (isMobile && activeId !== null) {
+      // Switching to mobile - collapse all
+      setActiveId(null);
+    }
+  }, [isMobile, perspectives, activeId]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const accordionRefs = useRef<Map<PerspectiveType, HTMLDivElement>>(new Map());
@@ -343,7 +359,8 @@ export const ProjectExpanded = ({ project, onClose }: ProjectExpandedProps) => {
   // Detect mobile
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+      const newIsMobile = window.innerWidth < 768;
+      setIsMobile(newIsMobile);
     };
     checkMobile();
     window.addEventListener("resize", checkMobile);

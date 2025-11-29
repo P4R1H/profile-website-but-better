@@ -6,37 +6,53 @@ import { ProjectExpanded } from "@/components/cards/projects/ProjectExpanded";
 export const personaProject: ProjectData = {
   id: "persona-tools",
   name: "Persona Essential",
-  tagline: "Full-stack platform centralizing $200,000+ in lifetime payments and delivering 400M+ impressions.",
+  tagline: "Enterprise business platform managing 100+ creators and processing $200,000+ in payments for major brands.",
   category: "Web",
   year: "2023",
+  icon: "/projects/persona.svg",
+  links: {
+    live: "https://personaessential.com",
+  },
 
   // Product Perspective
   product: {
-    tldr: "Led a team of 90+ creators, building tools to manage content strategy for clients like OperaGX, Polymarket, and Dreamworks.",
+    tldr: "Built the complete technical infrastructure for a stealth advertising firm connecting brands with content creators. Platform handles everything from submission management to payment processing.",
     points: [
       {
-        highlight: "Team Leadership:",
-        text: "Managed 90+ creators across multiple social platforms."
+        highlight: "Discord Bot:",
+        text: "Handles 100+ daily creator submissions, automatically syncing with the admin platform for approval workflows and payment tracking."
       },
       {
-        highlight: "$200k+ processed",
-        text: "through the centralized payment and reporting platform."
+        highlight: "Admin Platform:",
+        text: "Full-stack dashboard for managing 100+ creators, tracking campaigns, processing payments, and analyzing performance metrics."
       },
       {
-        highlight: "400M+ impressions",
-        text: "delivered for major brand clients."
+        highlight: "Landing Page:",
+        text: "Conversion-optimized design achieving 12% CTR, securing clients including MrBeast, Netflix, OperaGX, Polymarket, Dreamworks, and Roku."
       },
       {
-        highlight: "Operational efficiency:",
-        text: "Reduced manual overhead by 60% through automation."
+        highlight: "$200k+ processed,",
+        text: "400M+ impressions delivered across campaigns for major brands."
       },
     ],
   },
 
   // Engineering Perspective
   engineering: {
-    summary: "Full-stack Next.js application with custom dashboards, payment tracking, and analytics integrations.",
-    stack: ["nextjs", "ts", "py", "mongodb"],
+    summary: "Full-stack Next.js platform with Discord bot integration, payment processing, and real-time analytics.",
+    stack: ["nextjs", "ts", "py", "mongodb", "discordjs"],
+  },
+
+  // Design Perspective
+  design: {
+    summary: "Clean, professional interface for both internal operations and client acquisition.",
+    screenshot: "/projects/persona.png",
+    decisions: [
+      { key: "Landing Page", value: "Conversion-optimized design, 12% CTR" },
+      { key: "Admin Dashboard", value: "Data-dense interface for managing 100+ creators" },
+      { key: "Workflow", value: "Streamlined submission → approval → payment pipeline" },
+      { key: "Branding", value: "Professional aesthetic to attract enterprise clients" },
+    ],
   },
 
   isExpandable: true,
@@ -49,7 +65,7 @@ export const personaListItem: ProjectListItem = {
   name: "Persona Essential",
   category: "Web",
   year: "2023",
-  description: "Creator management platform, $200k+ processed",
+  description: "Enterprise platform for 100+ creators, $200k+ processed, 400M+ impressions",
   highlight: "$200k+ processed",
   stack: ["nextjs", "ts", "py", "mongodb"],
   isExpandable: true,
@@ -61,7 +77,7 @@ export const personaToolsCell: TesseractCellData = {
   id: "persona-tools",
   title: "Persona Tools",
   subtitle: "$200k+ Processed",
-  content: <div className="text-zinc-500 text-xs">Internal Platform</div>,
+  content: <div className="text-zinc-500 text-xs">Creator Management</div>,
   rowSpan: 1,
   renderExpanded: ({ onClose }) => (
     <ProjectExpanded project={personaProject} onClose={onClose} />

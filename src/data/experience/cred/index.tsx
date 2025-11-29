@@ -6,10 +6,11 @@ export const credData = {
   role: "Backend Intern (Wealth)",
   location: "Remote",
   period: "Oct 2025 – Jan 2026",
-  description: "Building wealth management infrastructure from the ground up.",
+  description: "Building CRED's wealth management platform from scratch. Working on secure, resilient microservices at scale.",
   highlights: [
-    "Zero-to-One Architecture: Building CRED's wealth management platform, designing secure, resilient, and scalable microservices.",
-    "High-Volume Systems: Developing RESTful APIs capable of processing millions of concurrent transactions with sub-second latency.",
+    "Architecture: Designing and implementing CRED's wealth management platform backend architecture from scratch.",
+    "High-Performance APIs: Building RESTful APIs handling millions of concurrent transactions with sub-second latency.",
+    "Production Systems: Working with Go, Java, and AWS to develop production-grade financial infrastructure.",
   ],
   stack: ["Go", "Java", "JavaScript", "AWS"],
 };
