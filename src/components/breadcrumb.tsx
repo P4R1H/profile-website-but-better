@@ -83,6 +83,19 @@ export const Breadcrumb = ({
           </button>
         </>
       )}
+
+        {/* WIP notice */}
+        <>
+          <span className="text-zinc-700 mx-2 select-none">|</span>
+          <a
+            href="https://terminal.parthg.tech"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-zinc-700 underline hover:text-white"
+          >
+            Work in progress - click here for the old, complete version.
+          </a>
+        </>
     </div>
   );
 };
