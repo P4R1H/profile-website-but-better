@@ -16,6 +16,7 @@ const FILTERS: { label: string; value: ProjectCategory | "All" }[] = [
   { label: "ML", value: "ML" },
   { label: "Infra", value: "Infrastructure" },
   { label: "Mobile", value: "Mobile" },
+  { label: "Systems", value: "Systems" },
   { label: "Other", value: "Other" },
 ];
 
@@ -24,6 +25,7 @@ const CATEGORY_SHORT: Record<ProjectCategory, string> = {
   ML: "ML",
   Infrastructure: "Infra",
   Mobile: "Mobile",
+  Systems: "Systems",
   Other: "Other",
 };
 

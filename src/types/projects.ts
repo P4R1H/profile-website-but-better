@@ -1,6 +1,6 @@
 // types/projects.ts - Project-specific type definitions
 
-export type ProjectCategory = "Web" | "ML" | "Infrastructure" | "Mobile" | "Other";
+export type ProjectCategory = "Web" | "ML" | "Infrastructure" | "Mobile" | "Systems" | "Other";
 
 export interface ProductPoint {
   text: string;
