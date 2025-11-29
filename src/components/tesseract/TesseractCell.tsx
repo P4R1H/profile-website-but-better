@@ -38,17 +38,20 @@ export const TesseractCell = ({
   onMobileClick,
 }: TesseractCellProps) => {
   const { config, isLocked, activeId, isMobile, state } = useTesseractContext();
-  
+
   const isActive = cell.id === activeId;
   const isHovered = state.hoveredItemId === cell.id;
   const canExpand = !cell.isLeaf && (cell.renderExpanded || (cell.children && cell.children.length > 0));
 
   // --- REFS ---
   const titleRef = useRef<HTMLHeadingElement | null>(null);
-  const trackRef = useRef<HTMLDivElement | null>(null);    
-  const progressRef = useRef<HTMLDivElement | null>(null); 
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const progressRef = useRef<HTMLDivElement | null>(null);
   const isLongPressTriggered = useRef(false);
   const wasLongPress = useRef(false);
+
+  // Ref for the motion.div - we'll use this for native event listeners
+  const cellRef = useRef<HTMLDivElement | null>(null);
 
   // --- INTERACTION ---
 
@@ -82,11 +85,8 @@ export const TesseractCell = ({
   // 2. Mobile Scrubber (Children + Mobile)
   const hasChildren = cell.children && cell.children.length > 0;
 
-  const {
-    onTouchStart: onScrubStart,
-    onTouchMove: onScrubMove,
-    onTouchEnd: onScrubEnd
-  } = useMobileScrubber({
+  // Pass the cellRef to the scrubber hook - it handles native event listeners internally
+  useMobileScrubber({
     enabled: isMobile && !isLocked && !!hasChildren,
     items: cell.children || [],
     originalTitle: cell.title,
@@ -94,11 +94,13 @@ export const TesseractCell = ({
     textRef: titleRef,
     trackRef: trackRef,
     progressRef: progressRef,
+    wrapperRef: cellRef, // The motion.div ref
   });
 
-  const touchHandlers = (isMobile && hasChildren && !isLocked)
-    ? { onTouchStart: onScrubStart, onTouchMove: onScrubMove, onTouchEnd: onScrubEnd }
-    : { onTouchStart: onStandardStart, onTouchMove: onStandardMove, onTouchEnd: onStandardEnd };
+  // For non-scrubber mobile interactions (cells without children)
+  const standardTouchHandlers = (isMobile && !hasChildren && !isLocked)
+    ? { onTouchStart: onStandardStart, onTouchMove: onStandardMove, onTouchEnd: onStandardEnd }
+    : {};
 
   // --- STYLING ---
   const calculateCellFlex = useCallback(() => {
@@ -151,8 +153,12 @@ export const TesseractCell = ({
     delay: isLocked && !isActive ? 0.9 : 0
   };
 
+  // Determine if this cell uses the scrubber
+  const useScrubber = isMobile && hasChildren && !isLocked;
+
   return (
     <motion.div
+      ref={cellRef}
       layout
       className={cn(
         "relative overflow-hidden bg-black border flex flex-col select-none",
@@ -164,19 +170,74 @@ export const TesseractCell = ({
       )}
       style={{
         ...calculateCellStyle(),
-        touchAction: (isMobile && hasChildren && !isLocked) ? "none" : "auto"
+        // For scrubber cells: touch-action: none because we handle ALL touch behavior
+        // (manual scroll simulation + scrubbing). For non-scrubber cells: default behavior.
+        touchAction: useScrubber ? 'none' : 'auto',
       }}
       animate={{ opacity: isLocked && !isActive ? 0 : 1 }}
       transition={{ layout: layoutTransition, opacity: opacityTransition }}
       onMouseEnter={() => onHoverEnter(cell.id, columnIndex, cell.disableHover)}
       onMouseLeave={onHoverLeave}
       onClick={handleClick}
-      {...(isMobile ? touchHandlers : {})}
+      // Only attach React touch handlers for non-scrubber cells
+      {...(useScrubber ? {} : standardTouchHandlers)}
     >
-      
+      <CellContent
+        cell={cell}
+        path={path}
+        onNavigate={onNavigate}
+        isActive={isActive}
+        isHovered={isHovered}
+        isLocked={isLocked}
+        isMobile={isMobile}
+        level={level}
+        config={config}
+        titleRef={titleRef}
+        trackRef={trackRef}
+        progressRef={progressRef}
+        hasChildren={!!hasChildren}
+      />
+    </motion.div>
+  );
+};
+
+// --- Extracted Cell Content Component ---
+interface CellContentProps {
+  cell: TesseractCellData;
+  path: string[];
+  onNavigate: (newPath: string[]) => void;
+  isActive: boolean;
+  isHovered: boolean;
+  isLocked: boolean;
+  isMobile: boolean;
+  level: number;
+  config: Required<TesseractConfig>;
+  titleRef: React.RefObject<HTMLHeadingElement | null>;
+  trackRef: React.RefObject<HTMLDivElement | null>;
+  progressRef: React.RefObject<HTMLDivElement | null>;
+  hasChildren: boolean;
+}
+
+const CellContent: React.FC<CellContentProps> = ({
+  cell,
+  path,
+  onNavigate,
+  isActive,
+  isHovered,
+  isLocked,
+  isMobile,
+  level,
+  config,
+  titleRef,
+  trackRef,
+  progressRef,
+  hasChildren,
+}) => {
+  return (
+    <>
       {/* --- SMART RAIL --- */}
       {isMobile && hasChildren && !isLocked && (
-        <div 
+        <div
           ref={trackRef}
           className="absolute top-0 bottom-0 w-0.5 z-50 pointer-events-none transition-opacity duration-200 opacity-0"
         >
@@ -185,16 +246,15 @@ export const TesseractCell = ({
 
           {/* Active Thumb (Subtle Glow) */}
           <div className="relative w-full h-full overflow-hidden">
-             <div 
-               ref={progressRef}
-               className="absolute w-[3px] bg-zinc-500"
-               style={{ 
-                 left: 0, 
-                 height: '20%', 
-                 // FIXED: Significantly reduced glow opacity and spread
-                 boxShadow: '0 0 6px 1px rgba(255, 255, 255, 0.2)'
-               }} 
-             />
+            <div
+              ref={progressRef}
+              className="absolute w-[3px] bg-zinc-500"
+              style={{
+                left: 0,
+                height: '20%',
+                boxShadow: '0 0 6px 1px rgba(255, 255, 255, 0.2)'
+              }}
+            />
           </div>
         </div>
       )}
@@ -203,7 +263,7 @@ export const TesseractCell = ({
         cell={cell}
         isActive={isActive}
         isMobile={isMobile}
-        titleRef={titleRef} 
+        titleRef={titleRef}
       />
 
       <ExpandedContent
@@ -225,7 +285,7 @@ export const TesseractCell = ({
           )}
         />
       )}
-    </motion.div>
+    </>
   );
 };
 
@@ -251,7 +311,7 @@ const CollapsedContent: React.FC<CollapsedContentProps> = ({ cell, isActive, isM
             ref={titleRef}
             layout="position"
             className={cn(
-              "text-zinc-100 font-bold uppercase tracking-tight transition-all duration-200", 
+              "text-zinc-100 font-bold uppercase tracking-tight transition-all duration-200",
               isMobile ? "text-2xl" : "text-lg"
             )}
           >
