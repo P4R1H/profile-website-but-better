@@ -8,7 +8,7 @@ export const ConnectPreview = () => {
   const { isHovered, isLocked } = useCellState("connect");
 
   const links = [
-    { name: "LINKEDIN", href: "https://linkedin.com/p4r1h" },
+    { name: "LINKEDIN", href: "https://www.linkedin.com/in/p4r1h/" },
     { name: "GITHUB", href: "https://github.com/P4R1H" },
     { name: "MAIL", href: "mailto:mail2parthgupta@gmail.com" },
   ];
