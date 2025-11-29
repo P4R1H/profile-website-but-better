@@ -392,5 +392,3 @@ const ExpandedContent: React.FC<ExpandedContentProps> = ({
     </AnimatePresence>
   );
 };
-
-export { useCellState };

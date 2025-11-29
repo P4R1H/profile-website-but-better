@@ -1,9 +1,9 @@
 export { Tesseract } from "./Tesseract";
-export { TesseractCell, useCellState } from "./TesseractCell";
-export { TesseractProvider, useTesseractContext } from "./TesseractContext";
-export type { 
-  TesseractCellData, 
+export { TesseractCell } from "./TesseractCell";
+export { TesseractProvider, useTesseractContext, useCellState } from "./TesseractContext";
+export type {
+  TesseractCellData,
   TesseractConfig,
   TesseractState,
-  ExpandedRenderProps 
+  ExpandedRenderProps
 } from "@/types/types";

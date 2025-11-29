@@ -129,7 +129,7 @@ export const HeroExpanded = ({ onClose }: HeroExpandedProps) => {
             >
               A generalist, slowly working towards becoming a general specialist. Not much here I know, I prefer to let my{' '}
               <a
-                href="https://drive.google.com/file/d/1HyfCKnOmNcYyDir5b6j7yugNU12aLgTN/view" // TODO: Update path to your resume
+                href="https://drive.google.com/file/d/1HyfCKnOmNcYyDir5b6j7yugNU12aLgTN/view"
                 target="_blank"
                 rel="noopener noreferrer"
                 // Same styling classes as "stuff"
