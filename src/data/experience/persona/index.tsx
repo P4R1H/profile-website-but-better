@@ -1,5 +1,5 @@
 import { TesseractCellData } from "@/types/types";
-import { CompanyDetail } from "@/components/cards/experience/CompanyDetail";
+import { ExperienceExpanded } from "@/components/cards/experience/ExperienceExpanded";
 
 export const personaData = {
   company: "Persona Essential",
@@ -19,5 +19,5 @@ export const personaCell: TesseractCellData = {
   title: "Persona",
   subtitle: "Team Lead",
   content: <div className="text-zinc-500 text-xs">Full Stack</div>,
-  renderExpanded: ({ onClose }) => <CompanyDetail data={personaData} onClose={onClose} />,
+  renderExpanded: ({ onClose }) => <ExperienceExpanded data={personaData} onClose={onClose} />,
 };

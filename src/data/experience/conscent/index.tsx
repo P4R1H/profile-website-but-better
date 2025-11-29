@@ -1,5 +1,5 @@
 import { TesseractCellData } from "@/types/types";
-import { CompanyDetail } from "@/components/cards/experience/CompanyDetail";
+import { ExperienceExpanded } from "@/components/cards/experience/ExperienceExpanded";
 
 export const conscentData = {
   company: "Conscent.ai",
@@ -19,5 +19,5 @@ export const conscentCell: TesseractCellData = {
   title: "Conscent",
   subtitle: "Data Science",
   content: <div className="text-zinc-500 text-xs">Big Data</div>,
-  renderExpanded: ({ onClose }) => <CompanyDetail data={conscentData} onClose={onClose} />,
+  renderExpanded: ({ onClose }) => <ExperienceExpanded data={conscentData} onClose={onClose} />,
 };
