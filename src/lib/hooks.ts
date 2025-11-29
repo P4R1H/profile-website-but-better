@@ -230,9 +230,10 @@ export const useMobileScrubber = ({
   
   // Momentum physics (time-based)
   // Deceleration rate per millisecond - tuned to approximate native iOS/Android feel
-  // Native uses ~0.998 but we use slightly lower for snappier stop
-  const DECELERATION_RATE = 0.994;
-  const MIN_VELOCITY = 0.01; // px/ms threshold to stop animation
+  // Higher value = slower deceleration = more momentum
+  const DECELERATION_RATE = 0.998;
+  const MIN_VELOCITY = 0.05; // px/ms threshold to stop animation
+  const VELOCITY_MULTIPLIER = 1.5; // Amplify flick velocity to feel more responsive
 
   // -------------------------------------------------------------------------
   // Velocity Tracking for Momentum (Time-Based)
@@ -282,7 +283,8 @@ export const useMobileScrubber = ({
   const startMomentumScroll = useCallback((initialVelocity: number) => {
     stopMomentum();
     
-    let velocity = initialVelocity; // px/ms
+    // Amplify and invert velocity: negative velocity (finger moved up) should scroll down
+    let velocity = -initialVelocity * VELOCITY_MULTIPLIER; // px/ms, positive = scroll down
     const scrollable = scrollableRef.current;
     const maxScroll = maxScrollRef.current;
     lastFrameTimeRef.current = performance.now();
@@ -310,7 +312,7 @@ export const useMobileScrubber = ({
       // Calculate displacement: velocity (px/ms) * time (ms) = pixels
       const displacement = velocity * dt;
       const currentPos = getScrollPosition(scrollable);
-      const newPos = Math.max(0, Math.min(maxScroll, currentPos - displacement));
+      const newPos = Math.max(0, Math.min(maxScroll, currentPos + displacement));
       
       setScrollPosition(scrollable, newPos);
       
