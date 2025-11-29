@@ -1,11 +1,30 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useCellState } from "@/components/tesseract";
 import Link from "next/link";
 
 export const ConnectPreview = () => {
   const { isHovered, isLocked } = useCellState("connect");
+  const linksRef = useRef<HTMLDivElement>(null);
+  const prevHovered = useRef(false);
+
+  // Auto-scroll to show links when expanded on mobile
+  useEffect(() => {
+    // Only trigger on transition from not-hovered to hovered (expansion)
+    if (isHovered && !prevHovered.current && !isLocked && linksRef.current) {
+      // Small delay to let the cell expansion animation start
+      const timer = setTimeout(() => {
+        linksRef.current?.scrollIntoView({ 
+          behavior: "smooth", 
+          block: "center" 
+        });
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+    prevHovered.current = isHovered;
+  }, [isHovered, isLocked]);
 
   const links = [
     { name: "LINKEDIN", href: "https://www.linkedin.com/in/p4r1h/" },
@@ -17,6 +36,7 @@ export const ConnectPreview = () => {
     <div className="w-full h-full relative pointer-events-none overflow-hidden">
       {!isLocked && (
         <motion.div
+          ref={linksRef}
           initial={false}
           animate={{
             opacity: isHovered ? 1 : 0,

@@ -95,6 +95,33 @@ export const allProjectsList: ProjectListItem[] = [
     isExpandable: false,
   },
   {
+    id: "profile-website-v1",
+    name: "Profile Website v1",
+    category: "Web",
+    year: "2022",
+    description: "made a dualphased profile website with a terminal view and a resume view",
+    stack: ["html", "js", "css"],
+    links: {
+      github: "https://github.com/P4R1H/profile-website",
+      live: "https://terminal.parthg.tech",
+      resume: "https://resume.parthg.tech",
+    },
+    isExpandable: false,
+  },
+  {
+    id: "this-website",
+    name: "This Website",
+    category: "Web",
+    year: "2025",
+    description: "Personal portfolio rebuilt with Next.js, TypeScript and a tesseract-inspired UI.",
+    stack: ["ts", "nextjs"],
+    links: {
+      github: "https://github.com/P4R1H/profile-website-but-better",
+      live: "https://parthg.tech",
+    },
+    isExpandable: false,
+  },
+  {
     id: "flourish",
     name: "Flourish",
     category: "Mobile",
