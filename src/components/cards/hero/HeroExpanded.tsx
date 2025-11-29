@@ -53,6 +53,7 @@ export const HeroExpanded = ({ onClose }: HeroExpandedProps) => {
         >
           <span className="mr-2 md:mr-3">I really, really like building</span>
           
+          {/* "stuff" Interaction */}
           <div 
             className="inline-block relative"
             onMouseEnter={() => setIsStuffOpen(true)}
@@ -94,14 +95,24 @@ export const HeroExpanded = ({ onClose }: HeroExpandedProps) => {
           <span>.</span>
         </motion.div>
 
-        {/* Line 3 - Philosophy */}
+        {/* Line 3 - Philosophy with highlighted Resume Link */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: visibleLines >= 3 ? 1 : 0 }}
           transition={{ duration: 0.8 }}
           className="mt-6 md:mt-12 text-lg md:text-2xl text-zinc-600 max-w-2xl leading-relaxed"
         >
-          A generalist, slowly working towards becoming a general specialist. Not much here I know, I prefer to let my work do the talk.
+          A generalist, slowly working towards becoming a general specialist. Not much here I know, I prefer to let my{' '}
+          <a 
+            href="https://drive.google.com/file/d/1HyfCKnOmNcYyDir5b6j7yugNU12aLgTN/view" // TODO: Update path to your resume
+            target="_blank" 
+            rel="noopener noreferrer"
+            // Same styling classes as "stuff"
+            className="cursor-pointer text-zinc-100 border-b-4 border-zinc-800 hover:border-white transition-colors pb-1 inline-block leading-none"
+          >
+            work
+          </a>
+          {' '}do the talk.
         </motion.p>
 
         {/* Bottom Section: Tabs Container */}
