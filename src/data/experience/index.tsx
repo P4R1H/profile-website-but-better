@@ -6,7 +6,7 @@ import { conscentCell } from './conscent';
 import { personaCell } from './persona';
 
 export const experienceItems: TesseractCellData[] = [
-  //credCell,
+  credCell,
   hpeCell,
   ecomCell,
   conscentCell,

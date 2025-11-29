@@ -83,11 +83,6 @@ export const Breadcrumb = ({
           </button>
         </>
       )}
-
-        {/* WIP notice */}
-        <>
-          <span className="text-zinc-700 mx-2 select-none">| WIP</span>
-        </>
     </div>
   );
 };
