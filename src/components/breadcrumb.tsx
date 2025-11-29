@@ -76,7 +76,7 @@ export const Breadcrumb = ({
           <span className="text-zinc-700 mx-2 select-none">|</span>
           <button
             onClick={() => onNavigate(path.slice(0, -1))}
-            className="text-xs text-zinc-600 hover:text-red-400 transition-colors flex items-center gap-1"
+            className="text-xs text-zinc-600 hover:text-white transition-colors flex items-center gap-1"
             aria-label="Go back"
           >
             <span>[BACK]</span>
@@ -86,15 +86,7 @@ export const Breadcrumb = ({
 
         {/* WIP notice */}
         <>
-          <span className="text-zinc-700 mx-2 select-none">|</span>
-          <a
-            href="https://terminal.parthg.tech"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-zinc-700 underline hover:text-white"
-          >
-            Work in progress - click here for the old, complete version.
-          </a>
+          <span className="text-zinc-700 mx-2 select-none">| WIP</span>
         </>
     </div>
   );
