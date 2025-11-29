@@ -12,17 +12,30 @@ export const ConnectPreview = () => {
 
   // Auto-scroll to show links when expanded on mobile
   useEffect(() => {
+    // Only trigger auto-scroll on touch / small-screen contexts
+    if (typeof window === "undefined") {
+      prevHovered.current = isHovered;
+      return;
+    }
+
+    const isTouchDevice =
+      "ontouchstart" in window ||
+      window.matchMedia?.("(hover: none)")?.matches ||
+      window.innerWidth < 768;
+
     // Only trigger on transition from not-hovered to hovered (expansion)
-    if (isHovered && !prevHovered.current && !isLocked && linksRef.current) {
+    if (isHovered && !prevHovered.current && !isLocked && linksRef.current && isTouchDevice) {
       // Small delay to let the cell expansion animation start
       const timer = setTimeout(() => {
-        linksRef.current?.scrollIntoView({ 
-          behavior: "smooth", 
-          block: "center" 
+        linksRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
         });
+        prevHovered.current = true;
       }, 150);
       return () => clearTimeout(timer);
     }
+
     prevHovered.current = isHovered;
   }, [isHovered, isLocked]);
 

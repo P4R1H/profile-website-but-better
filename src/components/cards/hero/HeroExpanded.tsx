@@ -18,6 +18,7 @@ const stuffOptions = [
 export const HeroExpanded = ({ onClose }: HeroExpandedProps) => {
   const [visibleLines, setVisibleLines] = useState(0);
   const [isStuffOpen, setIsStuffOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"rules" | "media" | "output">("rules");
 
   useEffect(() => {
     const timers = [
@@ -50,7 +51,6 @@ export const HeroExpanded = ({ onClose }: HeroExpandedProps) => {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-3xl sm:text-4xl md:text-5xl font-medium text-zinc-400 leading-tight relative"
         >
-          {/* FIX: Removed 'block' so it sits inline with 'stuff' */}
           <span className="mr-2 md:mr-3">I really, really like building</span>
           
           <div 
@@ -104,24 +104,119 @@ export const HeroExpanded = ({ onClose }: HeroExpandedProps) => {
           A generalist, slowly working towards becoming a general specialist. Not much here I know, I prefer to let my work do the talk.
         </motion.p>
 
-        {/* Rules Section */}
+        {/* Bottom Section: Tabs Container */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: visibleLines >= 4 ? 1 : 0 }}
           transition={{ duration: 1 }}
-          className="mt-6 md:mt-16 grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-8 border-t border-zinc-900 pt-4 md:pt-8"
+          className="mt-6 md:mt-16 border-t border-zinc-900 pt-4 md:pt-8"
         >
-          <div>
-            <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest block mb-1 md:mb-2">Rule 1</span>
-            <p className="text-zinc-400 text-sm md:text-base leading-snug">Grow higher order thinking. Architects replace engineers.</p>
+          {/* THE TOGGLE SWITCH */}
+          <div className="flex gap-6 mb-4 md:mb-6 text-xs font-mono uppercase tracking-widest">
+            <button 
+              onClick={() => setActiveTab("rules")}
+              className={`${activeTab === "rules" ? "text-zinc-100" : "text-zinc-600 hover:text-zinc-400"} transition-colors`}
+            >
+              01. Mindset
+            </button>
+            <button 
+              onClick={() => setActiveTab("media")}
+              className={`${activeTab === "media" ? "text-zinc-100" : "text-zinc-600 hover:text-zinc-400"} transition-colors`}
+            >
+              02. Input
+            </button>
+            <button 
+              onClick={() => setActiveTab("output")}
+              className={`${activeTab === "output" ? "text-zinc-100" : "text-zinc-600 hover:text-zinc-400"} transition-colors`}
+            >
+              03. Output
+            </button>
           </div>
-          <div>
-            <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest block mb-1 md:mb-2">Rule 2</span>
-            <p className="text-zinc-400 text-sm md:text-base leading-snug">Be curious, be a skeptic. "If" can become a "When"</p>
-          </div>
-          <div>
-            <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest block mb-1 md:mb-2">Rule 3</span>
-            <p className="text-zinc-400 text-sm md:text-base leading-snug">Embrace a state of flux, It's the only constant.</p>
+
+          {/* THE CONTENT GRID */}
+          <div className="relative min-h-[150px] md:min-h-[100px]"> 
+            <AnimatePresence mode="wait">
+              
+              {/* 01. RULES VIEW */}
+              {activeTab === "rules" && (
+                <motion.div
+                  key="rules"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                  className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-8 absolute w-full top-0 left-0"
+                >
+                  <div>
+                    <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest block mb-1 md:mb-2">Rule 1</span>
+                    <p className="text-zinc-400 text-sm md:text-base leading-snug">Grow higher order thinking. Architects replace engineers.</p>
+                  </div>
+                  <div>
+                    <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest block mb-1 md:mb-2">Rule 2</span>
+                    <p className="text-zinc-400 text-sm md:text-base leading-snug">Be curious, be a skeptic. "If" can become a "When"</p>
+                  </div>
+                  <div>
+                    <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest block mb-1 md:mb-2">Rule 3</span>
+                    <p className="text-zinc-400 text-sm md:text-base leading-snug">Embrace a state of flux, It's the only constant.</p>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* 02. MEDIA VIEW */}
+              {activeTab === "media" && (
+                <motion.div
+                  key="media"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                  className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-8 absolute w-full top-0 left-0"
+                >
+                  <div>
+                    <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest block mb-1 md:mb-2">Reading</span>
+                    <ul className="text-zinc-400 text-sm md:text-base leading-snug space-y-0.5">
+                      <li>What If? <span className="text-zinc-600">- Randall Munroe</span></li>
+                      <li>Vagabond <span className="text-zinc-600">- Takehiko Inoue</span></li>
+                      <li>Vinland Saga <span className="text-zinc-600">- Makoto Yukimura</span></li>
+                    </ul>
+                  </div>
+                  <div>
+                    <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest block mb-1 md:mb-2">Listening</span>
+                    <p className="text-zinc-400 text-sm md:text-base leading-snug">
+                      The NBHD, Don Toliver, Joji, Arctic Monkeys, JID, Metro Boomin, SZA, Kendrick Lamar.
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest block mb-1 md:mb-2">Watching</span>
+                    <p className="text-zinc-400 text-sm md:text-base leading-snug">
+                      Mostly youtube, my feed's gold.
+                      <span className="block mt-1 text-zinc-500">Veritasium, 3b1b, Nilered, Low level, Scott Yu Jan</span>
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* 03. OUTPUT VIEW */}
+              {activeTab === "output" && (
+                <motion.div
+                  key="output"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                  className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-8 absolute w-full top-0 left-0"
+                >
+                  {/* Column 1 */}
+                  <div>
+                    <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest block mb-1 md:mb-2">Cool stuff</span>
+                    <p className="text-zinc-400 text-sm md:text-base leading-snug">
+                      like this website
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+
+            </AnimatePresence>
           </div>
         </motion.div>
 
