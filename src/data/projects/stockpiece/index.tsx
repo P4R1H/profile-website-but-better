@@ -11,7 +11,7 @@ export const stockPieceProject: ProjectData = {
   year: "2024",
   icon: "/projects/berry.webp", // Add project icon
   links: {
-    live: "https://stockpiece.app",
+    live: "https://stockpiece.fun",
     github: "https://github.com/P4R1H/stockpiece",
   },
 
