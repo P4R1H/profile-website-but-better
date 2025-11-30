@@ -47,7 +47,7 @@ export const HeroExpanded = ({ onClose }: HeroExpandedProps) => {
   }, [visibleLines, activeTab]);
 
   return (
-    <div className="w-full h-dvh bg-black text-zinc-100 relative overflow-hidden">
+    <div className="w-full h-full bg-black text-zinc-100 relative overflow-hidden">
       {/* Top Blur */}
       <div className="absolute top-0 left-0 right-0 h-16 bg-linear-to-b from-black to-transparent z-20 pointer-events-none" />
 
@@ -56,7 +56,7 @@ export const HeroExpanded = ({ onClose }: HeroExpandedProps) => {
         onScroll={handleScroll}
         className="w-full h-full overflow-y-auto scrollbar-hide"
       >
-        <div className="min-h-full flex flex-col justify-center items-center py-20 md:py-32">
+        <div className="min-h-full flex flex-col justify-center items-center py-20 md:py-16">
           <div className="max-w-4xl w-full px-6 md:px-16 z-10">
 
             {/* Line 1 */}
