@@ -49,7 +49,7 @@ export const HeroExpanded = ({ onClose }: HeroExpandedProps) => {
   return (
     <div className="w-full h-dvh bg-black text-zinc-100 relative overflow-hidden">
       {/* Top Blur */}
-      <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-black to-transparent z-20 pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 h-16 bg-linear-to-b from-black to-transparent z-20 pointer-events-none" />
 
       <div
         ref={scrollRef}
@@ -262,7 +262,7 @@ export const HeroExpanded = ({ onClose }: HeroExpandedProps) => {
 
       {/* Bottom Blur */}
       <div
-        className={`absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black via-black/80 to-transparent z-20 pointer-events-none transition-opacity duration-300 ${showBottomBlur ? 'opacity-100' : 'opacity-0'
+        className={`absolute bottom-0 left-0 right-0 h-24 bg-linear-to-t from-black via-black/80 to-transparent z-20 pointer-events-none transition-opacity duration-300 ${showBottomBlur ? 'opacity-100' : 'opacity-0'
           }`}
       />
     </div>
