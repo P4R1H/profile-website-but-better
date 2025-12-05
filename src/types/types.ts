@@ -36,6 +36,8 @@ export interface TesseractCellData {
   renderExpanded?: (props: {
     onClose: () => void;
     cell: TesseractCellData;
+    path: string[];           // Current navigation path
+    onNavigate: (newPath: string[]) => void; // Navigate to a new path
   }) => ReactNode;           // Custom component for expanded state
   
   // Behavior Flags

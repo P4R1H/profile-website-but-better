@@ -243,14 +243,30 @@ export const thoughtsData: TesseractCellData = {
   title: "THOUGHTS",
   subtitle: "Writing",
   content: <ThoughtsPreview />,
-  renderExpanded: ({ onClose }) => (
-    <ThoughtsExpanded 
-      onClose={onClose} 
-      thoughts={thoughtsList}
-      premiumContent={premiumContent}
-      newsItems={newsItems}
-      trendingTopics={trendingTopics}
-      peopleToFollow={peopleToFollow}
-    />
-  ),
+  renderExpanded: ({ onClose, path, onNavigate }) => {
+    // Get the thought ID from path if present (e.g., ["thoughts", "blog-blinkit-interview"])
+    const initialThoughtId = path.length > 1 ? path[1] : undefined;
+    
+    // Handle navigation to/from individual thoughts
+    const handleNavigateToThought = (thoughtId: string | null) => {
+      if (thoughtId) {
+        onNavigate(["thoughts", thoughtId]);
+      } else {
+        onNavigate(["thoughts"]);
+      }
+    };
+
+    return (
+      <ThoughtsExpanded 
+        onClose={onClose} 
+        thoughts={thoughtsList}
+        premiumContent={premiumContent}
+        newsItems={newsItems}
+        trendingTopics={trendingTopics}
+        peopleToFollow={peopleToFollow}
+        initialThoughtId={initialThoughtId}
+        onNavigateToThought={handleNavigateToThought}
+      />
+    );
+  },
 };

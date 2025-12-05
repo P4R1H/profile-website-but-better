@@ -376,7 +376,7 @@ const ExpandedContent: React.FC<ExpandedContentProps> = ({
                 scale: { duration: 0.4, ease: "easeOut" },
               }}
             >
-              {cell.renderExpanded({ onClose: () => onNavigate(path.slice(0, -1)), cell })}
+              {cell.renderExpanded({ onClose: () => onNavigate(path.slice(0, -1)), cell, path, onNavigate })}
             </motion.div>
           ) : (
             <Tesseract

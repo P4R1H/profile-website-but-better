@@ -20,10 +20,16 @@ export const Breadcrumb = ({
   
   // Optimized: Resolve the full object chain based on the path
   // This is much faster than searching the whole tree for every segment
+  // Filter out deep paths for sections like thoughts (hide individual thought IDs)
   const breadcrumbItems = useMemo(() => {
     let currentLevel = rootItems;
     
-    return path.map((id) => {
+    // For thoughts section, only show first level ("thoughts"), not individual thought IDs
+    const displayPath = path[0] === "thoughts" && path.length > 1 
+      ? path.slice(0, 1) 
+      : path;
+    
+    return displayPath.map((id) => {
       const item = currentLevel.find((n) => n.id === id);
       
       // If we found the item, update the scope to search its children next
@@ -47,10 +53,10 @@ export const Breadcrumb = ({
       >
         ~root
       </button>
-      {/* Path Segments */}
+      {/* Path Segments - uses displayPath for cleaner breadcrumb */}
       {breadcrumbItems.map((crumb, index) => {
-        const isLast = index === path.length - 1;
-        // The path to this segment is the slice up to this index + 1
+        const isLast = index === breadcrumbItems.length - 1;
+        // Navigate to this segment's position in displayPath
         const segmentPath = path.slice(0, index + 1);
 
         return (

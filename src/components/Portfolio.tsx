@@ -1,19 +1,41 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Tesseract } from "@/components/tesseract/Tesseract";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { rootItems } from "@/data/portfolio";
 import { useMediaQuery } from "@/lib/hooks";
+import { getTitleForPath } from "@/lib/seo";
+
+// Declare gtag for TypeScript
+declare global {
+  interface Window {
+    gtag?: (...args: unknown[]) => void;
+  }
+}
 
 interface PortfolioProps {
   initialIsDesktop: boolean;
+  initialPath?: string[];
 }
 
-export function Portfolio({ initialIsDesktop }: PortfolioProps) {
-  const [path, setPath] = useState<string[]>([]);
+export function Portfolio({ initialIsDesktop, initialPath = [] }: PortfolioProps) {
+  const [path, setPath] = useState<string[]>(initialPath);
   const isDesktop = useMediaQuery("(min-width: 768px)", initialIsDesktop);
   const [mounted, setMounted] = useState(false);
+
+  // Track page view in GA4
+  const trackPageView = useCallback((pagePath: string[]) => {
+    if (typeof window !== "undefined" && window.gtag) {
+      const url = "/" + pagePath.join("/");
+      const title = getTitleForPath(pagePath);
+      window.gtag("event", "page_view", {
+        page_path: url,
+        page_title: title,
+        page_location: window.location.origin + url,
+      });
+    }
+  }, []);
 
   useEffect(() => {
     setMounted(true);
@@ -21,20 +43,24 @@ export function Portfolio({ initialIsDesktop }: PortfolioProps) {
 
   // Handle browser back/forward button
   useEffect(() => {
-    // Initialize history state on mount
-    if (mounted && !window.history.state?.tesseractPath) {
-      window.history.replaceState({ tesseractPath: [] }, "", window.location.href);
+    if (!mounted) return;
+
+    // Initialize history state on mount with current URL
+    const currentUrl = "/" + path.join("/");
+    if (!window.history.state?.tesseractPath) {
+      window.history.replaceState({ tesseractPath: path }, "", currentUrl || "/");
     }
 
     const handlePopState = (event: PopStateEvent) => {
-      // If the user presses back and there's a tesseract path in history
       if (event.state?.tesseractPath) {
         setPath(event.state.tesseractPath);
-      } else if (path.length > 0) {
-        // If there's no state but we have a path, go back one level
-        setPath([]);
+        trackPageView(event.state.tesseractPath);
+      } else {
+        // Parse path from URL as fallback
+        const urlPath = window.location.pathname.split("/").filter(Boolean);
+        setPath(urlPath);
+        trackPageView(urlPath);
       }
-      // If path is already empty, let the browser handle it (will close the page)
     };
 
     window.addEventListener("popstate", handlePopState);
@@ -42,28 +68,21 @@ export function Portfolio({ initialIsDesktop }: PortfolioProps) {
     return () => {
       window.removeEventListener("popstate", handlePopState);
     };
-  }, [mounted, path]);
+  }, [mounted, trackPageView]);
 
-  // Custom navigation handler that updates both state and history
-  const handleNavigate = (newPath: string[]) => {
-    // If navigating deeper or to a different path, push to history
-    if (newPath.length > 0) {
-      window.history.pushState(
-        { tesseractPath: newPath },
-        "",
-        window.location.href
-      );
-    } else if (path.length > 0) {
-      // Going back to root
-      window.history.pushState(
-        { tesseractPath: [] },
-        "",
-        window.location.href
-      );
-    }
+  // Custom navigation handler that updates both state, history, and URL
+  const handleNavigate = useCallback((newPath: string[]) => {
+    const newUrl = "/" + newPath.join("/");
+    
+    window.history.pushState(
+      { tesseractPath: newPath },
+      "",
+      newUrl || "/"
+    );
 
     setPath(newPath);
-  };
+    trackPageView(newPath);
+  }, [trackPageView]);
 
   // Use isDesktop directly since we have a good initial guess
   const columns = isDesktop ? 3 : 1;

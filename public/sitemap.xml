@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+<url><loc>https://parthg.tech</loc><lastmod>2025-12-05T10:27:30.024Z</lastmod><changefreq>weekly</changefreq><priority>1</priority></url>
+<url><loc>https://parthg.tech/me</loc><lastmod>2025-12-05T10:27:30.024Z</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+<url><loc>https://parthg.tech/experience</loc><lastmod>2025-12-05T10:27:30.024Z</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+<url><loc>https://parthg.tech/projects</loc><lastmod>2025-12-05T10:27:30.024Z</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+<url><loc>https://parthg.tech/stack</loc><lastmod>2025-12-05T10:27:30.024Z</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+<url><loc>https://parthg.tech/thoughts</loc><lastmod>2025-12-05T10:27:30.024Z</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+<url><loc>https://parthg.tech/wins</loc><lastmod>2025-12-05T10:27:30.024Z</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+<url><loc>https://parthg.tech/experience/cred</loc><lastmod>2025-12-05T10:27:30.024Z</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
+<url><loc>https://parthg.tech/experience/hpe</loc><lastmod>2025-12-05T10:27:30.024Z</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
+<url><loc>https://parthg.tech/experience/ecom</loc><lastmod>2025-12-05T10:27:30.024Z</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
+<url><loc>https://parthg.tech/experience/conscent</loc><lastmod>2025-12-05T10:27:30.024Z</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
+<url><loc>https://parthg.tech/experience/persona</loc><lastmod>2025-12-05T10:27:30.024Z</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
+<url><loc>https://parthg.tech/projects/stockpiece</loc><lastmod>2025-12-05T10:27:30.024Z</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
+<url><loc>https://parthg.tech/projects/moderation</loc><lastmod>2025-12-05T10:27:30.024Z</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
+<url><loc>https://parthg.tech/projects/persona</loc><lastmod>2025-12-05T10:27:30.024Z</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
+<url><loc>https://parthg.tech/projects/skilljourney</loc><lastmod>2025-12-05T10:27:30.024Z</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
+<url><loc>https://parthg.tech/thoughts/blog-blinkit-interview</loc><lastmod>2025-12-05T10:27:30.024Z</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
+<url><loc>https://parthg.tech/thoughts/blog-sprinklr-interview</loc><lastmod>2025-12-05T10:27:30.024Z</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
+<url><loc>https://parthg.tech/thoughts/blog-cred-interview</loc><lastmod>2025-12-05T10:27:30.024Z</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
+<url><loc>https://parthg.tech/thoughts/thought-1</loc><lastmod>2025-12-05T10:27:30.024Z</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
+</urlset>

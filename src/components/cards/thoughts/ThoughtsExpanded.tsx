@@ -54,6 +54,8 @@ interface ThoughtsExpandedProps {
   newsItems: NewsItem[];
   trendingTopics: TrendingTopic[];
   peopleToFollow: PersonToFollow[];
+  initialThoughtId?: string;  // For deep linking to a specific thought
+  onNavigateToThought?: (thoughtId: string | null) => void; // Update URL when selecting a thought
 }
 
 // Reusable SVG icons
@@ -75,19 +77,34 @@ export const ThoughtsExpanded = ({
   premiumContent,
   newsItems,
   trendingTopics,
-  peopleToFollow
+  peopleToFollow,
+  initialThoughtId,
+  onNavigateToThought,
 }: ThoughtsExpandedProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastScrollTop = useRef(0);
   
+  // Initialize with deep-linked thought if provided
+  const initialThought = initialThoughtId 
+    ? thoughts.find(t => t.id === initialThoughtId) || null 
+    : null;
+  
   // UI State
-  const [selectedThought, setSelectedThought] = useState<ThoughtItem | null>(null);
+  const [selectedThought, setSelectedThought] = useState<ThoughtItem | null>(initialThought);
   const [visibleCount, setVisibleCount] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<"thoughts" | "blogs">("thoughts");
+  const [activeTab, setActiveTab] = useState<"thoughts" | "blogs">(
+    initialThought?.tags?.includes("blog") ? "blogs" : "thoughts"
+  );
   const [isScrolled, setIsScrolled] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+
+  // Handle thought selection with URL update
+  const handleSelectThought = (thought: ThoughtItem | null) => {
+    setSelectedThought(thought);
+    onNavigateToThought?.(thought?.id || null);
+  };
   
   // Interaction state for detail view
   const [isLiked, setIsLiked] = useState(false);
@@ -154,7 +171,7 @@ export const ThoughtsExpanded = ({
     <button
       onClick={() => {
         setActiveTab(tab);
-        setSelectedThought(null); // Close any open thought when switching tabs
+        handleSelectThought(null); // Close any open thought when switching tabs
       }}
       className={`flex-1 py-4 text-[15px] font-semibold transition-colors relative ${
         activeTab === tab ? "text-zinc-100" : "text-zinc-500 hover:bg-zinc-900/50"
@@ -205,7 +222,7 @@ export const ThoughtsExpanded = ({
                       <div className="font-bold text-zinc-100">Parth</div>
                       <div className="text-zinc-600 text-sm">@parthg</div>
                     </div>
-                    <button onClick={() => setSelectedThought(null)} className="text-zinc-500 hover:text-zinc-100 p-1">
+                    <button onClick={() => handleSelectThought(null)} className="text-zinc-500 hover:text-zinc-100 p-1">
                       <X className="w-5 h-5" />
                     </button>
                   </div>
@@ -282,7 +299,7 @@ export const ThoughtsExpanded = ({
                     <ThoughtCard 
                       key={thought.id} 
                       thought={thought} 
-                      onClick={isExpandable ? () => setSelectedThought(thought) : undefined} 
+                      onClick={isExpandable ? () => handleSelectThought(thought) : undefined} 
                     />
                   );
                 })}
@@ -350,7 +367,7 @@ export const ThoughtsExpanded = ({
                     <ThoughtCard 
                       key={thought.id} 
                       thought={thought} 
-                      onClick={isExpandable ? () => { setSelectedThought(thought); setShowMobileSearch(false); } : undefined} 
+                      onClick={isExpandable ? () => { handleSelectThought(thought); setShowMobileSearch(false); } : undefined} 
                     />
                   );
                 })
